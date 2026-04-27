@@ -10,67 +10,748 @@ import { useState, useEffect, useRef, useCallback } from "react";
 // To use: save your downloaded Pinterest photos with the exact filenames listed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── PRODUCT DATA ────────────────────────────────────────────────────────────
+// ─── PRODUCT DATA (verified against pricelist 09.04.26) ──────────────────────
 const PRODUCTS = [
-  // LIQUIDS
-  { id: 1,  name: "Dish Washing Liquid – Lemon",         category: "Liquids",        price: 100,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [100,160,650,2200],   image: "/images/products/dish-wash-lemon.jpg",        description: "Powerful lemon-scented formula cuts through grease effortlessly.",                    badge: "Best Seller", featured: true  },
-  { id: 2,  name: "Dish Washing Liquid – Lime (Premium)",category: "Liquids",        price: 110,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [110,190,750,2600],   image: "/images/products/dish-wash-lime.jpg",         description: "Premium lime variant for a streak-free, fresh finish.",                               badge: "Premium",    featured: false },
-  { id: 3,  name: "Handwash – Strawberry",               category: "Liquids",        price: 100,  sizes: ["500ML Pump","5LTR","20LTR"],                prices: [100,650,2400],      image: "/images/products/handwash-strawberry.jpg",    description: "Gentle strawberry-scented handwash, moisturises as it cleans.",                       badge: "Best Seller", featured: true  },
-  { id: 4,  name: "Handwash Cream – Lemon",              category: "Liquids",        price: 160,  sizes: ["500ML Pump","5LTR","20LTR"],                prices: [160,700,2560],      image: "/images/products/handwash-cream-lemon.jpg",   description: "Luxurious cream handwash with added moisturisers.",                                   badge: null,         featured: false },
-  { id: 5,  name: "Pine Antibacterial Handwash",         category: "Liquids",        price: 140,  sizes: ["500ML Pump"],                               prices: [140],               image: "/images/products/handwash-pine.jpg",          description: "Kills 99.9% of bacteria with a refreshing pine fragrance.",                           badge: "Antibacterial", featured: true },
-  { id: 6,  name: "Multipurpose Liquid Detergent – Lemon",category: "Liquids",       price: 100,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [100,180,500,1600],  image: "/images/products/multipurpose-lemon.jpg",     description: "Versatile cleaner for floors, surfaces, and fabrics.",                                badge: null,         featured: false },
-  { id: 7,  name: "Disinfectant Liquid – Pine",          category: "Liquids",        price: 130,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [130,180,700,2600],  image: "/images/products/disinfectant-pine.jpg",      description: "Hospital-grade pine disinfectant for all surfaces.",                                  badge: "Best Seller", featured: true  },
-  { id: 8,  name: "Disinfectant Liquid – Lavender",      category: "Liquids",        price: 130,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [130,160,600,2400],  image: "/images/products/disinfectant-lavender.jpg",  description: "Calming lavender disinfectant, leaves spaces smelling fresh.",                        badge: null,         featured: false },
-  { id: 9,  name: "Bleach Regular White",                category: "Liquids",        price: 100,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [100,200,600,2200],  image: "/images/products/bleach-white.jpg",           description: "Sodium Hypochlorite bleach for white clothes and floor disinfection.",                 badge: null,         featured: false },
-  { id: 10, name: "Bleach Colour Safe",                  category: "Liquids",        price: 130,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [130,250,700,2400],  image: "/images/products/bleach-colour-safe.jpg",     description: "Safe for coloured clothes, removes stains without fading.",                           badge: null,         featured: false },
-  { id: 11, name: "Stain Remover / Toilet Cleaner",      category: "Liquids",        price: 200,  sizes: ["500ML","750ML","1LTR","5LTR","20LTR"],      prices: [200,300,350,1200,4600], image: "/images/products/toilet-cleaner.jpg",      description: "Powerful toilet cleaner that dissolves stains and limescale.",                        badge: "Best Seller", featured: true  },
-  { id: 12, name: "Glass Cleaner – Lavender",            category: "Liquids",        price: 160,  sizes: ["500ML","5LTR","20LTR"],                     prices: [160,850,3100],      image: "/images/products/glass-cleaner.jpg",          description: "Streak-free glass and window cleaner, sparkling results.",                            badge: null,         featured: false },
-  { id: 13, name: "Oven Cleaner",                        category: "Liquids",        price: 350,  sizes: ["500ML","5LTR","20LTR"],                     prices: [350,1600,6200],     image: "/images/products/oven-cleaner.jpg",           description: "Heavy-duty oven degreaser, removes baked-on oil and grease.",                         badge: null,         featured: false },
-  { id: 14, name: "Shower Gel – Flora Fresh",            category: "Liquids",        price: 300,  sizes: ["400ML","800ML","5LTR","20LTR"],             prices: [300,450,860,5600],  image: "/images/products/shower-gel.jpg",             description: "Refreshing floral shower gel for a luxurious bath experience.",                       badge: "Premium",    featured: true  },
-  { id: 15, name: "Fabric Softener – Flora Fresh",       category: "Liquids",        price: 300,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [300,1100,4350],     image: "/images/products/fabric-softener.jpg",        description: "Leaves laundry soft, fluffy, and smelling beautifully fresh.",                        badge: null,         featured: false },
-  { id: 16, name: "Machine Wash Liquid",                 category: "Liquids",        price: 300,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [300,800,3000],      image: "/images/products/machine-wash-liquid.jpg",    description: "High-efficiency laundry detergent for washing machines.",                             badge: null,         featured: false },
-  { id: 17, name: "Degreaser – Industrial",              category: "Liquids",        price: 200,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [200,760,2322],      image: "/images/products/degreaser.jpg",              description: "Industrial-strength degreaser removes oil and grease instantly.",                     badge: null,         featured: false },
-  { id: 18, name: "Car Wash Shampoo – Strawberry",       category: "Liquids",        price: 200,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [200,700,2400],      image: "/images/products/car-wash-shampoo.jpg",       description: "pH-balanced car shampoo for a spotless, shiny finish.",                               badge: null,         featured: false },
-  { id: 19, name: "Salad Wash",                          category: "Liquids",        price: 650,  sizes: ["1LTR","5LTR"],                              prices: [650,3000],          image: "/images/products/salad-wash.jpg",             description: "Food-safe wash for fruits and vegetables, removes pesticides.",                       badge: null,         featured: false },
-  { id: 20, name: "Hand Sanitizer Gel/Liquid",           category: "Liquids",        price: 90,   sizes: ["100ML","500ML","5LTR","20LTR"],             prices: [90,266,1936,7670],  image: "/images/products/hand-sanitizer.jpg",         description: "70% alcohol formula kills germs on contact, quick-dry.",                              badge: "Best Seller", featured: true  },
-  // POWDERS
-  { id: 21, name: "Scouring Powder – Multi-Surface",     category: "Powders",        price: 90,   sizes: ["500G","1KG","5KG","20KG"],                  prices: [90,160,700,2000],   image: "/images/products/scouring-powder.jpg",        description: "Abrasive powder for toilets, ceramics, and floor whitening.",                         badge: null,         featured: false },
-  { id: 22, name: "Laundry Powder",                      category: "Powders",        price: 2500, sizes: ["5KG","20KG"],                               prices: [2500,9500],         image: "/images/products/laundry-powder.jpg",         description: "High-performance laundry powder for washing machines.",                               badge: "Best Seller", featured: true  },
-  { id: 23, name: "GX 730 Detergent – Reclaim Whiteness",category: "Powders",        price: 2200, sizes: ["5KG"],                                      prices: [2200],              image: "/images/products/gx730-detergent.jpg",        description: "Powerful whitening detergent restores brilliant white to fabrics.",                   badge: null,         featured: false },
-  { id: 24, name: "Hand Washing Powder",                 category: "Powders",        price: 200,  sizes: ["1KG","10KG"],                               prices: [200,1400],          image: "/images/products/hand-washing-powder.jpg",    description: "Gentle on hands, tough on stains for hand-wash laundry.",                             badge: null,         featured: false },
-  { id: 25, name: "Drain Cleaner Powder",                category: "Powders",        price: 70,   sizes: ["50G","100G","200G","500G","5KG","20KG"],    prices: [70,125,200,300,2000,7800], image: "/images/products/drain-cleaner.jpg",    description: "Unblocks clogged sinks and pipes fast without harsh chemicals.",                      badge: null,         featured: false },
-  { id: 50, name: "Bar Soap",                            category: "Powders",        price: 200,  sizes: ["1KG (10pc)"],                               prices: [200],               image: "/images/products/bar-soap.jpg",               description: "Traditional bar soap for laundry and general cleaning.",                              badge: null,         featured: false },
-  // CLEANING TOOLS
-  { id: 26, name: "Mop Super (No Handle)",               category: "Cleaning Tools", price: 145,  sizes: ["L1"],                                       prices: [145],               image: "/images/products/mop-super.jpg",              description: "Heavy-duty mop head for large surface cleaning.",                                     badge: null,         featured: false },
-  { id: 27, name: "Jumbo Mop with Metal Socket",         category: "Cleaning Tools", price: 400,  sizes: ["L11FH"],                                    prices: [400],               image: "/images/products/mop-jumbo.jpg",              description: "Professional jumbo mop with durable metal socket.",                                   badge: null,         featured: false },
-  { id: 28, name: "Soft Broom 11.5\"",                   category: "Cleaning Tools", price: 400,  sizes: ["C10FH"],                                    prices: [400],               image: "/images/products/broom-soft.jpg",             description: "Soft-bristle broom for indoor sweeping on delicate floors.",                          badge: null,         featured: false },
-  { id: 29, name: "Broom 18\" Heavy Duty",               category: "Cleaning Tools", price: 595,  sizes: ["E7FH"],                                     prices: [595],               image: "/images/products/broom-heavy.jpg",            description: "Large 18-inch broom for outdoor and commercial use.",                                 badge: null,         featured: false },
-  { id: 30, name: "Dustpan with Handle",                 category: "Cleaning Tools", price: 400,  sizes: ["F3"],                                       prices: [400],               image: "/images/products/dustpan.jpg",                description: "Ergonomic dustpan with long handle, no bending required.",                            badge: null,         featured: false },
-  { id: 31, name: "Squeegee Floor/Window 17\"",          category: "Cleaning Tools", price: 400,  sizes: ["K5FH"],                                     prices: [400],               image: "/images/products/squeegee.jpg",               description: "Versatile squeegee for sparkling floors and windows.",                                badge: null,         featured: false },
-  { id: 32, name: "Scrubbing Brush",                     category: "Cleaning Tools", price: 136,  sizes: ["A1"],                                       prices: [136],               image: "/images/products/scrubbing-brush.jpg",        description: "Stiff-bristle brush for stubborn dirt and grime removal.",                            badge: null,         featured: false },
-  { id: 33, name: "Scouring Pad Green (12pc)",           category: "Cleaning Tools", price: 400,  sizes: ["12PC"],                                     prices: [400],               image: "/images/products/scouring-pad.jpg",           description: "Non-scratch scouring pads ideal for pots and pans.",                                 badge: "Best Seller", featured: false },
-  { id: 34, name: "Industrial Gloves",                   category: "Cleaning Tools", price: 200,  sizes: ["Black","Green","Red"],                      prices: [200,250,300],       image: "/images/products/gloves.jpg",                 description: "Heavy-duty gloves for safe chemical and cleaning use.",                               badge: null,         featured: false },
-  { id: 35, name: "Mop Bucket No.2",                     category: "Cleaning Tools", price: 550,  sizes: ["Standard"],                                 prices: [550],               image: "/images/products/mop-bucket.jpg",             description: "Durable mop bucket with wringer for efficient mopping.",                              badge: null,         featured: false },
-  { id: 49, name: "Microfiber Towel",                    category: "Cleaning Tools", price: 200,  sizes: ["Single"],                                   prices: [200],               image: "/images/products/microfiber-towel.jpg",       description: "Ultra-absorbent microfiber cloth, perfect for streak-free cleaning.",                 badge: null,         featured: false },
-  // AIR FRESHENERS
-  { id: 36, name: "Air Freshener Spray",                 category: "Air Fresheners", price: 220,  sizes: ["300ML"],                                    prices: [220],               image: "/images/products/air-freshener-spray.jpg",    description: "Instant room freshener, long-lasting fragrance burst.",                               badge: null,         featured: false },
-  { id: 37, name: "Auto Toilet Cleaner & Air Freshener", category: "Air Fresheners", price: 350,  sizes: ["4pc PKT"],                                  prices: [350],               image: "/images/products/auto-toilet-freshener.jpg",  description: "Automatic toilet freshener, cleans and deodorises with every flush.",                 badge: "Best Seller", featured: true  },
-  { id: 38, name: "Blue Bubble – Ocean/Lavender",        category: "Air Fresheners", price: 200,  sizes: ["2pc PKT"],                                  prices: [200],               image: "/images/products/blue-bubble.jpg",            description: "Toilet cistern block for a fresh scent with every flush.",                            badge: null,         featured: false },
-  { id: 39, name: "AIRFRESHNER Semi-Auto Machine",       category: "Air Fresheners", price: 1800, sizes: ["Machine+Bottle"],                           prices: [1800],              image: "/images/products/air-freshener-machine.jpg",  description: "Wall-mounted semi-automatic air freshener dispenser.",                                badge: "Premium",    featured: false },
-  { id: 40, name: "Car Air Freshener (30 days)",         category: "Air Fresheners", price: 400,  sizes: ["Single"],                                   prices: [400],               image: "/images/products/car-air-freshener.jpg",      description: "Long-lasting car freshener, keeps your car smelling great for 30 days.",              badge: null,         featured: false },
-  // PAPER & TISSUE
-  { id: 41, name: "Tissue Rolls 200-Sheet (10 Pack)",    category: "Paper & Tissue", price: 250,  sizes: ["10 Pack"],                                  prices: [250],               image: "/images/products/tissue-rolls-10pack.jpg",    description: "Soft, strong 2-ply toilet rolls, 200 sheets per roll.",                               badge: "Best Seller", featured: true  },
-  { id: 42, name: "Tissue Rolls Bale (40pc)",            category: "Paper & Tissue", price: 900,  sizes: ["40PC Bale"],                                prices: [900],               image: "/images/products/tissue-rolls-bale.jpg",      description: "Bulk value bale of 40 tissue rolls for offices and homes.",                           badge: null,         featured: false },
-  { id: 43, name: "Jumbo Tissue 800-Sheet",              category: "Paper & Tissue", price: 1105, sizes: ["Recycled","Blended"],                       prices: [1105,1690],         image: "/images/products/jumbo-tissue.jpg",           description: "Large jumbo roll for commercial bathrooms and restrooms.",                             badge: null,         featured: false },
-  { id: 44, name: "Hand Towel Tissue",                   category: "Paper & Tissue", price: 360,  sizes: ["PKT 12"],                                   prices: [360],               image: "/images/products/hand-towel-tissue.jpg",      description: "Absorbent hand towel tissues for washrooms and kitchens.",                            badge: null,         featured: false },
-  // SPECIALTY
-  { id: 45, name: "Tyre Shine",                          category: "Specialty",      price: 300,  sizes: ["500ML","1LTR","5LTR","20LTR"],              prices: [300,400,1600,6000], image: "/images/products/tyre-shine.jpg",             description: "Long-lasting tyre shine gives a rich, wet-look finish.",                              badge: null,         featured: false },
-  { id: 46, name: "Carpet Shampoo – Lavender",           category: "Specialty",      price: 200,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [200,700,2600],      image: "/images/products/carpet-shampoo.jpg",         description: "Deep-cleaning carpet shampoo removes stains and odours.",                             badge: null,         featured: false },
-  { id: 47, name: "Tiles Cleaner (HCL Acid)",            category: "Specialty",      price: 250,  sizes: ["1LTR","5LTR","20LTR"],                      prices: [250,1000,3500],     image: "/images/products/tiles-cleaner.jpg",          description: "Acid-based tiles cleaner dissolves mineral deposits and grout stains.",                badge: null,         featured: false },
-  { id: 48, name: "Stubborn Stain Remover (Acid)",       category: "Specialty",      price: 300,  sizes: ["125ML","250ML","500ML","1LTR"],             prices: [300,600,1100,2100], image: "/images/products/stain-remover-acid.jpg",     description: "Industrial acid stain remover for stubborn toilet and tile stains.",                  badge: null,         featured: false },
+  // ── LIQUIDS ──────────────────────────────────────────────────────────────
+  {
+    id: 1, name: "Dish Washing Liquid – Lemon (Regular)", category: "Liquids",
+    price: 100, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [100,160,650,2200],
+    image: "/images/products/dish-wash-lemon.jpg",
+    description: "Powerful lemon-scented formula cuts through grease effortlessly.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 2, name: "Dish Washing Liquid – Lime (Premium)", category: "Liquids",
+    price: 110, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [110,190,750,2600],
+    image: "/images/products/dish-wash-lime.jpg",
+    description: "Premium lime variant for a streak-free, fresh finish.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 3, name: "Auto Dish Rinse Aid", category: "Liquids",
+    price: 1330, sizes: ["5LTR","20LTR"], prices: [1330,5175],
+    image: "/images/products/auto-dish-rinse.jpg",
+    description: "Machine rinse aid for sparkling, spot-free dishes every cycle.",
+    badge: null, featured: false,
+  },
+  {
+    id: 4, name: "Handwash – Strawberry / Lemon / Aloe Vera / Tropical", category: "Liquids",
+    price: 100, sizes: ["500ML Pump","5LTR","20LTR"], prices: [100,650,2400],
+    image: "/images/products/handwash-strawberry.jpg",
+    description: "Gentle fruit-scented handwash, moisturises as it cleans.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 5, name: "Handwash Cream – Lemon & Strawberry", category: "Liquids",
+    price: 160, sizes: ["500ML Pump","5LTR","20LTR"], prices: [160,700,2560],
+    image: "/images/products/handwash-cream-lemon.jpg",
+    description: "Luxurious cream handwash with added moisturisers.",
+    badge: null, featured: false,
+  },
+  {
+    id: 6, name: "Pine Antibacterial Handwash", category: "Liquids",
+    price: 140, sizes: ["500ML Pump"], prices: [140],
+    image: "/images/products/handwash-pine.jpg",
+    description: "Kills 99.9% of bacteria with a refreshing pine fragrance.",
+    badge: "Antibacterial", featured: true,
+  },
+  {
+    id: 7, name: "Multipurpose Liquid Detergent – Lemon (Regular)", category: "Liquids",
+    price: 100, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [100,180,500,1600],
+    image: "/images/products/multipurpose-lemon.jpg",
+    description: "Versatile cleaner for floors, surfaces, and fabrics.",
+    badge: null, featured: false,
+  },
+  {
+    id: 8, name: "Multipurpose Liquid Detergent – Lavender (Premium)", category: "Liquids",
+    price: 100, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [100,180,700,2700],
+    image: "/images/products/multipurpose-lavender.jpg",
+    description: "Premium lavender multi-surface cleaner, long-lasting fragrance.",
+    badge: null, featured: false,
+  },
+  {
+    id: 9, name: "Disinfectant Liquid – Pine", category: "Liquids",
+    price: 130, sizes: ["500ML Trigger","1LTR","5LTR","20LTR"], prices: [130,180,700,2600],
+    image: "/images/products/disinfectant-pine.jpg",
+    description: "Hospital-grade pine disinfectant for all surfaces.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 10, name: "Disinfectant Liquid – Lavender", category: "Liquids",
+    price: 130, sizes: ["500ML Trigger","1LTR","5LTR","20LTR"], prices: [130,160,600,2400],
+    image: "/images/products/disinfectant-lavender.jpg",
+    description: "Calming lavender disinfectant, leaves spaces smelling fresh.",
+    badge: null, featured: false,
+  },
+  {
+    id: 11, name: "Bleach Regular White", category: "Liquids",
+    price: 100, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [100,200,600,2200],
+    image: "/images/products/bleach-white.jpg",
+    description: "Sodium Hypochlorite bleach for white clothes and floor disinfection.",
+    badge: null, featured: false,
+  },
+  {
+    id: 12, name: "Bleach Colour Safe", category: "Liquids",
+    price: 130, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [130,250,700,2400],
+    image: "/images/products/bleach-colour-safe.jpg",
+    description: "Safe for coloured clothes, removes stains without fading.",
+    badge: null, featured: false,
+  },
+  {
+    id: 13, name: "Stain Remover / Toilet Cleaner", category: "Liquids",
+    price: 200, sizes: ["500ML","750ML","1LTR","5LTR","20LTR"], prices: [200,300,350,1200,4600],
+    image: "/images/products/toilet-cleaner.jpg",
+    description: "Powerful toilet cleaner that dissolves stains and limescale.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 14, name: "Glass Cleaner / Window – Lavender & Lime", category: "Liquids",
+    price: 160, sizes: ["500ML Trigger","5LTR","20LTR"], prices: [160,850,3100],
+    image: "/images/products/glass-cleaner.jpg",
+    description: "Streak-free glass and window cleaner, sparkling results.",
+    badge: null, featured: false,
+  },
+  {
+    id: 15, name: "Oven Cleaner", category: "Liquids",
+    price: 350, sizes: ["500ML","5LTR","20LTR"], prices: [350,1600,6200],
+    image: "/images/products/oven-cleaner.jpg",
+    description: "Heavy-duty oven degreaser, removes baked-on oil and grease.",
+    badge: null, featured: false,
+  },
+  {
+    id: 16, name: "Shower Gel – Flora Fresh & Menthol (Regular)", category: "Liquids",
+    price: 300, sizes: ["400ML","800ML","5LTR","20LTR"], prices: [300,450,860,5600],
+    image: "/images/products/shower-gel.jpg",
+    description: "Refreshing floral/menthol shower gel for a luxurious bath experience.",
+    badge: "Premium", featured: true,
+  },
+  {
+    id: 17, name: "Shower Gel – Flora Fresh (Premium)", category: "Liquids",
+    price: 300, sizes: ["5LTR"], prices: [1600],
+    image: "/images/products/shower-gel-premium.jpg",
+    description: "Premium 5LTR shower gel concentrate for salons and bulk buyers.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 18, name: "Machine Wash Liquid (Regular)", category: "Liquids",
+    price: 300, sizes: ["1LTR","5LTR","20LTR"], prices: [300,800,3000],
+    image: "/images/products/machine-wash-liquid.jpg",
+    description: "High-efficiency laundry detergent for washing machines.",
+    badge: null, featured: false,
+  },
+  {
+    id: 19, name: "Machine Wash Liquid (Premium)", category: "Liquids",
+    price: 300, sizes: ["5LTR","20LTR"], prices: [1400,5400],
+    image: "/images/products/machine-wash-liquid-premium.jpg",
+    description: "Premium HE washing machine liquid, powerful stain removal.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 20, name: "Fabric Softener – Flora Fresh", category: "Liquids",
+    price: 300, sizes: ["1LTR","5LTR","20LTR"], prices: [300,1100,4350],
+    image: "/images/products/fabric-softener.jpg",
+    description: "Leaves laundry soft, fluffy, and smelling beautifully fresh.",
+    badge: null, featured: false,
+  },
+  {
+    id: 21, name: "Linen Disinfectant Liquid – Pine Oil", category: "Liquids",
+    price: 170, sizes: ["1LTR","5LTR","20LTR"], prices: [170,630,2200],
+    image: "/images/products/linen-disinfectant.jpg",
+    description: "Pine oil linen disinfectant, freshens and sanitises fabric.",
+    badge: null, featured: false,
+  },
+  {
+    id: 22, name: "Degreaser – Industrial (Regular)", category: "Liquids",
+    price: 200, sizes: ["1LTR","5LTR","20LTR"], prices: [200,760,2322],
+    image: "/images/products/degreaser.jpg",
+    description: "Industrial-strength degreaser removes oil and grease instantly.",
+    badge: null, featured: false,
+  },
+  {
+    id: 23, name: "Degreaser – Industrial (Premium)", category: "Liquids",
+    price: 329, sizes: ["1LTR","5LTR","20LTR"], prices: [329,1600,6000],
+    image: "/images/products/degreaser-premium.jpg",
+    description: "Heavy-duty premium degreaser for commercial kitchens and workshops.",
+    badge: null, featured: false,
+  },
+  {
+    id: 24, name: "Degreaser – Hands", category: "Liquids",
+    price: 325, sizes: ["1LTR","5LTR","20LTR"], prices: [325,1421,5096],
+    image: "/images/products/degreaser-hands.jpg",
+    description: "Hand-safe degreaser for mechanics and engineers, removes grease gently.",
+    badge: null, featured: false,
+  },
+  {
+    id: 25, name: "Hand Sanitizer Gel / Liquid", category: "Liquids",
+    price: 90, sizes: ["100ML Spray","500ML Pump","5LTR","20LTR"], prices: [90,266,1936,7670],
+    image: "/images/products/hand-sanitizer.jpg",
+    description: "70% alcohol formula kills germs on contact, quick-dry.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 26, name: "Salad Wash – Fruits & Vegetables", category: "Liquids",
+    price: 650, sizes: ["1LTR","5LTR"], prices: [650,3000],
+    image: "/images/products/salad-wash.jpg",
+    description: "Food-safe wash for fruits and vegetables, removes pesticides.",
+    badge: null, featured: false,
+  },
+  {
+    id: 27, name: "Master Chef Sanitizer – Working Tops", category: "Liquids",
+    price: 1400, sizes: ["5LTR","20LTR"], prices: [1400,5000],
+    image: "/images/products/master-chef-sanitizer.jpg",
+    description: "Food-grade surface sanitizer for kitchen countertops and prep areas.",
+    badge: null, featured: false,
+  },
+  {
+    id: 28, name: "Gemigaurd Floor Sanitizer / Disinfectant", category: "Liquids",
+    price: 850, sizes: ["1LTR","5LTR"], prices: [850,3400],
+    image: "/images/products/gemigaurd.jpg",
+    description: "Professional floor sanitizer and disinfectant for all hard floors.",
+    badge: null, featured: false,
+  },
+  {
+    id: 29, name: "Laundry Booster Liquid Emulsifier", category: "Liquids",
+    price: 655, sizes: ["1LTR","5LTR","20LTR"], prices: [655,2557,9324],
+    image: "/images/products/laundry-booster.jpg",
+    description: "Emulsifier booster lifts tough stains and brightens fabrics.",
+    badge: null, featured: false,
+  },
+  {
+    id: 30, name: "Car Wash Shampoo – Strawberry", category: "Liquids",
+    price: 200, sizes: ["1LTR","5LTR","20LTR"], prices: [200,700,2400],
+    image: "/images/products/car-wash-shampoo.jpg",
+    description: "pH-balanced car shampoo for a spotless, shiny finish.",
+    badge: null, featured: false,
+  },
+  {
+    id: 31, name: "Tyre Shine (Regular)", category: "Liquids",
+    price: 300, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [300,400,1600,6000],
+    image: "/images/products/tyre-shine.jpg",
+    description: "Long-lasting tyre shine gives a rich, wet-look finish.",
+    badge: null, featured: false,
+  },
+  {
+    id: 32, name: "Tyre Shine (Premium)", category: "Liquids",
+    price: 600, sizes: ["500ML","1LTR","5LTR","20LTR"], prices: [600,900,4000,15000],
+    image: "/images/products/tyre-shine-premium.jpg",
+    description: "Premium tyre shine with extended durability, ultra-gloss finish.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 33, name: "Carpet Shampoo – Lavender", category: "Liquids",
+    price: 200, sizes: ["1LTR","5LTR","20LTR"], prices: [200,700,2600],
+    image: "/images/products/carpet-shampoo.jpg",
+    description: "Deep-cleaning carpet shampoo removes stains and odours.",
+    badge: null, featured: false,
+  },
+  {
+    id: 34, name: "Tiles Cleaner (HCL Acid)", category: "Liquids",
+    price: 250, sizes: ["1LTR","5LTR","20LTR"], prices: [250,1000,3500],
+    image: "/images/products/tiles-cleaner.jpg",
+    description: "Acid-based tiles cleaner dissolves mineral deposits and grout stains.",
+    badge: null, featured: false,
+  },
+  {
+    id: 35, name: "Cabro Cleaner", category: "Liquids",
+    price: 3000, sizes: ["20LTR"], prices: [3000],
+    image: "/images/products/cabro-cleaner.jpg",
+    description: "Powerful paving and cabro cleaner for driveways and walkways.",
+    badge: null, featured: false,
+  },
+  {
+    id: 36, name: "Terrazzo Floor Cleaner", category: "Liquids",
+    price: 337, sizes: ["1LTR","5LTR","20LTR"], prices: [337,1325,4562],
+    image: "/images/products/terrazzo-cleaner.jpg",
+    description: "Specialist terrazzo floor cleaner restores shine and removes stains.",
+    badge: null, featured: false,
+  },
+  {
+    id: 37, name: "Floor Striper", category: "Liquids",
+    price: 335, sizes: ["1LTR","5LTR","20LTR"], prices: [335,1294,4738],
+    image: "/images/products/floor-striper.jpg",
+    description: "Removes old wax, glue, and soil from hard floors.",
+    badge: null, featured: false,
+  },
+  {
+    id: 38, name: "Stubborn Stain Remover (Acid)", category: "Liquids",
+    price: 300, sizes: ["125ML","250ML","500ML","1LTR"], prices: [300,600,1100,2100],
+    image: "/images/products/stain-remover-acid.jpg",
+    description: "Industrial acid stain remover for stubborn toilet and tile stains.",
+    badge: null, featured: false,
+  },
+  {
+    id: 39, name: "Finel – Local White (like Kerol)", category: "Liquids",
+    price: 400, sizes: ["1LTR","5LTR","20LTR"], prices: [400,1350,5600],
+    image: "/images/products/finel-white.jpg",
+    description: "White phenyl disinfectant for floors, toilets, and drains.",
+    badge: null, featured: false,
+  },
+  {
+    id: 40, name: "Finel – India Black (like Kerol)", category: "Liquids",
+    price: 600, sizes: ["1LTR","5LTR","20LTR"], prices: [600,2800,11000],
+    image: "/images/products/finel-black.jpg",
+    description: "Black phenyl heavy-duty disinfectant for industrial use.",
+    badge: null, featured: false,
+  },
+  {
+    id: 41, name: "Quartisan Terminator Disinfectant", category: "Liquids",
+    price: 800, sizes: ["5LTR","20LTR"], prices: [800,2800],
+    image: "/images/products/quartisan.jpg",
+    description: "Broad-spectrum terminator disinfectant for high-risk environments.",
+    badge: null, featured: false,
+  },
+  {
+    id: 42, name: "Descalant – Lye Caustic (Vessel Cleaning)", category: "Liquids",
+    price: 4300, sizes: ["20LTR"], prices: [4300],
+    image: "/images/products/descalant.jpg",
+    description: "Caustic descalant for dairy vessel and industrial equipment cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 43, name: "Oxazan Sanitizer – Equipment & Surfaces", category: "Liquids",
+    price: 6028, sizes: ["20LTR"], prices: [6028],
+    image: "/images/products/oxazan.jpg",
+    description: "High-level equipment and surface sanitizer for food-processing facilities.",
+    badge: null, featured: false,
+  },
+  {
+    id: 44, name: "Drill Foam – Borehole", category: "Liquids",
+    price: 1800, sizes: ["20LTR"], prices: [1800],
+    image: "/images/products/drill-foam.jpg",
+    description: "Specialist borehole foam for drilling operations.",
+    badge: null, featured: false,
+  },
+
+  // ── POWDERS ───────────────────────────────────────────────────────────────
+  {
+    id: 50, name: "Scouring Powder – Multi-Surface", category: "Powders",
+    price: 90, sizes: ["500G","1KG","5KG","20KG"], prices: [90,160,700,2000],
+    image: "/images/products/scouring-powder.jpg",
+    description: "Abrasive powder for toilets, ceramics, and floor whitening.",
+    badge: null, featured: false,
+  },
+  {
+    id: 51, name: "Laundry Powder – Washing Machine", category: "Powders",
+    price: 2500, sizes: ["5KG","20KG"], prices: [2500,9500],
+    image: "/images/products/laundry-powder.jpg",
+    description: "High-performance laundry powder for washing machines.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 52, name: "GX 730 Detergent – Reclaim Whiteness", category: "Powders",
+    price: 2200, sizes: ["5KG"], prices: [2200],
+    image: "/images/products/gx730-detergent.jpg",
+    description: "Powerful whitening detergent restores brilliant white to fabrics.",
+    badge: null, featured: false,
+  },
+  {
+    id: 53, name: "Chloro 004 – Mould Remover", category: "Powders",
+    price: 2600, sizes: ["5KG"], prices: [2600],
+    image: "/images/products/chloro004.jpg",
+    description: "Professional mould remover powder for walls, grout, and fabrics.",
+    badge: null, featured: false,
+  },
+  {
+    id: 54, name: "Cloth Rust Remover – Ironizer", category: "Powders",
+    price: 2400, sizes: ["5KG"], prices: [2400],
+    image: "/images/products/ironizer.jpg",
+    description: "Removes rust and iron stains from white and coloured fabrics.",
+    badge: null, featured: false,
+  },
+  {
+    id: 55, name: "Hand Washing Powder", category: "Powders",
+    price: 200, sizes: ["1KG","10KG"], prices: [200,1400],
+    image: "/images/products/hand-washing-powder.jpg",
+    description: "Gentle on hands, tough on stains for hand-wash laundry.",
+    badge: null, featured: false,
+  },
+  {
+    id: 56, name: "Drain Cleaner Powder", category: "Powders",
+    price: 70, sizes: ["50G","100G","200G","500G","5KG","20KG"], prices: [70,125,200,300,2000,7800],
+    image: "/images/products/drain-cleaner.jpg",
+    description: "Unblocks clogged sinks and pipes fast without harsh chemicals.",
+    badge: null, featured: false,
+  },
+  {
+    id: 57, name: "Distainer – Cutlery", category: "Powders",
+    price: 428, sizes: ["500GM (12pc)"], prices: [428],
+    image: "/images/products/distainer.jpg",
+    description: "Removes tarnish and stains from cutlery and silverware.",
+    badge: null, featured: false,
+  },
+  {
+    id: 58, name: "Pit Digestor", category: "Powders",
+    price: 400, sizes: ["500GM"], prices: [400],
+    image: "/images/products/pit-digestor.jpg",
+    description: "Biological digestor for septic pits and waste management.",
+    badge: null, featured: false,
+  },
+  {
+    id: 59, name: "Lime Scale Remover", category: "Powders",
+    price: 600, sizes: ["250GM"], prices: [600],
+    image: "/images/products/limescale-remover.jpg",
+    description: "Dissolves limescale and calcium deposits from taps and appliances.",
+    badge: null, featured: false,
+  },
+  {
+    id: 60, name: "Bar Soap", category: "Powders",
+    price: 200, sizes: ["1KG (10pc)"], prices: [200],
+    image: "/images/products/bar-soap.jpg",
+    description: "Traditional bar soap for laundry and general cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 61, name: "Dishwash Paste", category: "Powders",
+    price: 150, sizes: ["400G","800G"], prices: [150,300],
+    image: "/images/products/dishwash-paste.jpg",
+    description: "Heavy-duty dishwash paste for pots, pans, and bakeware.",
+    badge: null, featured: false,
+  },
+  {
+    id: 62, name: "Toilet Balls (5pc PKT)", category: "Powders",
+    price: 150, sizes: ["200GM"], prices: [150],
+    image: "/images/products/toilet-balls.jpg",
+    description: "Flushable toilet balls for continuous bowl freshness.",
+    badge: null, featured: false,
+  },
+  {
+    id: 63, name: "Air Freshener Blocks", category: "Powders",
+    price: 62, sizes: ["50GM"], prices: [62],
+    image: "/images/products/airfreshener-blocks.jpg",
+    description: "Solid air freshener blocks for wardrobes, cars, and rooms.",
+    badge: null, featured: false,
+  },
+  {
+    id: 64, name: "Naphthalene Balls", category: "Powders",
+    price: 130, sizes: ["100GM"], prices: [130],
+    image: "/images/products/naphthalene-balls.jpg",
+    description: "Classic moth repellent balls to protect stored clothes.",
+    badge: null, featured: false,
+  },
+
+  // ── CLEANING TOOLS ───────────────────────────────────────────────────────
+  {
+    id: 70, name: "Mop Super (No Handle)", category: "Cleaning Tools",
+    price: 145, sizes: ["L1"], prices: [145],
+    image: "/images/products/mop-super.jpg",
+    description: "Heavy-duty mop head for large surface cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 71, name: "Jumbo Super Mop", category: "Cleaning Tools",
+    price: 259, sizes: ["L17FH"], prices: [259],
+    image: "/images/products/mop-jumbo-super.jpg",
+    description: "Jumbo super mop for heavy-duty floor cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 72, name: "Large Mop with Metal Socket", category: "Cleaning Tools",
+    price: 351, sizes: ["L10FH"], prices: [351],
+    image: "/images/products/mop-large-metal.jpg",
+    description: "Large mop with durable metal socket for professional use.",
+    badge: null, featured: false,
+  },
+  {
+    id: 73, name: "Large Mop with Plastic Socket", category: "Cleaning Tools",
+    price: 290, sizes: ["L2FH"], prices: [290],
+    image: "/images/products/mop-large-plastic.jpg",
+    description: "Large mop with lightweight plastic socket.",
+    badge: null, featured: false,
+  },
+  {
+    id: 74, name: "Jumbo Mop with Metal Socket", category: "Cleaning Tools",
+    price: 400, sizes: ["L11FH"], prices: [400],
+    image: "/images/products/mop-jumbo.jpg",
+    description: "Professional jumbo mop with durable metal socket.",
+    badge: null, featured: false,
+  },
+  {
+    id: 75, name: "Jumbo Threaded Metal Socket Mop", category: "Cleaning Tools",
+    price: 497, sizes: ["L15FH / L3FH"], prices: [497],
+    image: "/images/products/mop-jumbo-threaded.jpg",
+    description: "Jumbo mop with threaded metal socket for easy handle attachment.",
+    badge: null, featured: false,
+  },
+  {
+    id: 76, name: "Mop Bucket No. 2", category: "Cleaning Tools",
+    price: 550, sizes: ["Standard"], prices: [550],
+    image: "/images/products/mop-bucket.jpg",
+    description: "Durable mop bucket with wringer for efficient mopping.",
+    badge: null, featured: false,
+  },
+  {
+    id: 77, name: "Broom 12\" Soft (No Handle)", category: "Cleaning Tools",
+    price: 176, sizes: ["C3F"], prices: [176],
+    image: "/images/products/broom-12-soft.jpg",
+    description: "Soft-bristle 12-inch broom head without handle.",
+    badge: null, featured: false,
+  },
+  {
+    id: 78, name: "Broom 12\" Hard (No Handle)", category: "Cleaning Tools",
+    price: 171, sizes: ["C36"], prices: [171],
+    image: "/images/products/broom-12-hard.jpg",
+    description: "Hard-bristle 12-inch broom head for outdoor sweeping.",
+    badge: null, featured: false,
+  },
+  {
+    id: 79, name: "Soft Broom 11.5\"", category: "Cleaning Tools",
+    price: 400, sizes: ["C10FH"], prices: [400],
+    image: "/images/products/broom-soft.jpg",
+    description: "Soft-bristle broom for indoor sweeping on delicate floors.",
+    badge: null, featured: false,
+  },
+  {
+    id: 80, name: "Soft Broom 10\"", category: "Cleaning Tools",
+    price: 300, sizes: ["C16FH"], prices: [300],
+    image: "/images/products/broom-10.jpg",
+    description: "Compact 10-inch soft broom ideal for small indoor spaces.",
+    badge: null, featured: false,
+  },
+  {
+    id: 81, name: "Broom 18\" Heavy Duty", category: "Cleaning Tools",
+    price: 595, sizes: ["E7FH"], prices: [595],
+    image: "/images/products/broom-heavy.jpg",
+    description: "Large 18-inch broom for outdoor and commercial use.",
+    badge: null, featured: false,
+  },
+  {
+    id: 82, name: "Dustpan with Handle", category: "Cleaning Tools",
+    price: 400, sizes: ["F3"], prices: [400],
+    image: "/images/products/dustpan.jpg",
+    description: "Ergonomic dustpan with long handle, no bending required.",
+    badge: null, featured: false,
+  },
+  {
+    id: 83, name: "Dustbin Waste Paper", category: "Cleaning Tools",
+    price: 200, sizes: ["A002"], prices: [200],
+    image: "/images/products/dustbin.jpg",
+    description: "Desktop waste paper bin for offices and work areas.",
+    badge: null, featured: false,
+  },
+  {
+    id: 84, name: "8\" Window Squeegee Extendable", category: "Cleaning Tools",
+    price: 800, sizes: ["GB002"], prices: [800],
+    image: "/images/products/squeegee-8.jpg",
+    description: "Extendable 8-inch window squeegee for hard-to-reach glass.",
+    badge: null, featured: false,
+  },
+  {
+    id: 85, name: "10\" Window Squeegee Extendable", category: "Cleaning Tools",
+    price: 1000, sizes: ["GB003"], prices: [1000],
+    image: "/images/products/squeegee-10.jpg",
+    description: "Extendable 10-inch window squeegee for large glass surfaces.",
+    badge: null, featured: false,
+  },
+  {
+    id: 86, name: "17\" Squeegee Floor / Window", category: "Cleaning Tools",
+    price: 400, sizes: ["K5FH"], prices: [400],
+    image: "/images/products/squeegee.jpg",
+    description: "Versatile squeegee for sparkling floors and windows.",
+    badge: null, featured: false,
+  },
+  {
+    id: 87, name: "18\" Squeegee Heavy Duty", category: "Cleaning Tools",
+    price: 700, sizes: ["K2FH"], prices: [700],
+    image: "/images/products/squeegee-heavy.jpg",
+    description: "Heavy-duty 18-inch squeegee for commercial floor and window use.",
+    badge: null, featured: false,
+  },
+  {
+    id: 88, name: "Toilet Brush B9", category: "Cleaning Tools",
+    price: 300, sizes: ["PCS"], prices: [300],
+    image: "/images/products/toilet-brush.jpg",
+    description: "Durable toilet brush for daily bowl cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 89, name: "Scrubbing Brush", category: "Cleaning Tools",
+    price: 136, sizes: ["A1"], prices: [136],
+    image: "/images/products/scrubbing-brush.jpg",
+    description: "Stiff-bristle brush for stubborn dirt and grime removal.",
+    badge: null, featured: false,
+  },
+  {
+    id: 90, name: "Scouring Pad Green (12pc)", category: "Cleaning Tools",
+    price: 400, sizes: ["12PC"], prices: [400],
+    image: "/images/products/scouring-pad.jpg",
+    description: "Non-scratch scouring pads ideal for pots and pans.",
+    badge: "Best Seller", featured: false,
+  },
+  {
+    id: 91, name: "Scouring Balls (5pc)", category: "Cleaning Tools",
+    price: 40, sizes: ["1PC"], prices: [40],
+    image: "/images/products/scouring-balls.jpg",
+    description: "Steel scouring balls for heavy-duty pot and pan cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 92, name: "Steelwool", category: "Cleaning Tools",
+    price: 333, sizes: ["750G"], prices: [333],
+    image: "/images/products/steelwool.jpg",
+    description: "Fine-grade steel wool for polishing and heavy scrubbing.",
+    badge: null, featured: false,
+  },
+  {
+    id: 93, name: "Industrial Gloves – Black", category: "Cleaning Tools",
+    price: 200, sizes: ["Black"], prices: [200],
+    image: "/images/products/gloves-black.jpg",
+    description: "Heavy-duty black rubber gloves for safe chemical handling.",
+    badge: null, featured: false,
+  },
+  {
+    id: 94, name: "Industrial Gloves – Green", category: "Cleaning Tools",
+    price: 250, sizes: ["Green"], prices: [250],
+    image: "/images/products/gloves-green.jpg",
+    description: "Green industrial gloves for general cleaning tasks.",
+    badge: null, featured: false,
+  },
+  {
+    id: 95, name: "Industrial Gloves – Red", category: "Cleaning Tools",
+    price: 300, sizes: ["Red"], prices: [300],
+    image: "/images/products/gloves-red.jpg",
+    description: "Red heavy-duty gloves for hazardous chemical use.",
+    badge: null, featured: false,
+  },
+  {
+    id: 96, name: "Hair Net – White", category: "Cleaning Tools",
+    price: 580, sizes: ["PKT 100's"], prices: [580],
+    image: "/images/products/hair-net.jpg",
+    description: "Disposable white hair nets for food handling and hygiene.",
+    badge: null, featured: false,
+  },
+  {
+    id: 97, name: "Broom Handle Wooden", category: "Cleaning Tools",
+    price: 155, sizes: ["N1"], prices: [155],
+    image: "/images/products/broom-handle.jpg",
+    description: "Standard wooden broom handle fits most broom and mop heads.",
+    badge: null, featured: false,
+  },
+  {
+    id: 98, name: "Cob-Web Remover", category: "Cleaning Tools",
+    price: 500, sizes: ["J2 / J4"], prices: [500],
+    image: "/images/products/cobweb-remover.jpg",
+    description: "Long-reach cob-web duster for ceilings and corners.",
+    badge: null, featured: false,
+  },
+  {
+    id: 99, name: "Urinal Screen / Mat", category: "Cleaning Tools",
+    price: 270, sizes: ["Assorted Colour"], prices: [270],
+    image: "/images/products/urinal-screen.jpg",
+    description: "Fragranced urinal screen/mat reduces splash and deodorises.",
+    badge: null, featured: false,
+  },
+  {
+    id: 100, name: "Microfiber Towel", category: "Cleaning Tools",
+    price: 200, sizes: ["Single"], prices: [200],
+    image: "/images/products/microfiber-towel.jpg",
+    description: "Ultra-absorbent microfiber cloth, perfect for streak-free cleaning.",
+    badge: null, featured: false,
+  },
+  {
+    id: 101, name: "Wood & Multi-Polish", category: "Cleaning Tools",
+    price: 300, sizes: ["PCS"], prices: [300],
+    image: "/images/products/wood-polish.jpg",
+    description: "Multipurpose polish for wood, tiles, and hard surfaces.",
+    badge: null, featured: false,
+  },
+
+  // ── AIR FRESHENERS ───────────────────────────────────────────────────────
+  {
+    id: 110, name: "Air Freshener Spray", category: "Air Fresheners",
+    price: 220, sizes: ["300ML"], prices: [220],
+    image: "/images/products/air-freshener-spray.jpg",
+    description: "Instant room freshener, long-lasting fragrance burst.",
+    badge: null, featured: false,
+  },
+  {
+    id: 111, name: "Air Freshener Home", category: "Air Fresheners",
+    price: 175, sizes: ["10GM (6 pack)"], prices: [175],
+    image: "/images/products/air-freshener-home.jpg",
+    description: "Compact home air freshener discs, pleasant lasting scent.",
+    badge: null, featured: false,
+  },
+  {
+    id: 112, name: "Car Air Freshener (30 days)", category: "Air Fresheners",
+    price: 400, sizes: ["Single"], prices: [400],
+    image: "/images/products/car-air-freshener.jpg",
+    description: "Long-lasting car freshener, keeps your car smelling great for 30 days.",
+    badge: null, featured: false,
+  },
+  {
+    id: 113, name: "Auto Toilet Cleaner & Air Freshener", category: "Air Fresheners",
+    price: 350, sizes: ["4pc PKT"], prices: [350],
+    image: "/images/products/auto-toilet-freshener.jpg",
+    description: "Automatic toilet freshener, cleans and deodorises with every flush.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 114, name: "Blue Bubble – Ocean / Lavender", category: "Air Fresheners",
+    price: 200, sizes: ["2pc PKT"], prices: [200],
+    image: "/images/products/blue-bubble.jpg",
+    description: "Toilet cistern block for a fresh scent with every flush.",
+    badge: null, featured: false,
+  },
+  {
+    id: 115, name: "Air Freshener Semi-Automatic Machine", category: "Air Fresheners",
+    price: 1800, sizes: ["Machine + Bottle"], prices: [1800],
+    image: "/images/products/air-freshener-machine.jpg",
+    description: "Wall-mounted semi-automatic air freshener dispenser.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 116, name: "Air Freshener Sensor-Automatic Machine", category: "Air Fresheners",
+    price: 4000, sizes: ["Machine + Refill"], prices: [4000],
+    image: "/images/products/air-freshener-sensor.jpg",
+    description: "Motion-sensor automatic air freshener dispenser, hands-free freshness.",
+    badge: "Premium", featured: false,
+  },
+
+  // ── PAPER & TISSUE ───────────────────────────────────────────────────────
+  {
+    id: 120, name: "Tissue Rolls 200-Sheet (10 Pack) – Regular", category: "Paper & Tissue",
+    price: 250, sizes: ["10 Pack"], prices: [250],
+    image: "/images/products/tissue-rolls-10pack.jpg",
+    description: "Soft, strong 2-ply toilet rolls, 200 sheets per roll.",
+    badge: "Best Seller", featured: true,
+  },
+  {
+    id: 121, name: "Tissue Rolls 200-Sheet (10 Pack) – Premium", category: "Paper & Tissue",
+    price: 400, sizes: ["10 Pack"], prices: [400],
+    image: "/images/products/tissue-rolls-10pack-premium.jpg",
+    description: "Premium 2-ply toilet rolls, extra soft and absorbent.",
+    badge: "Premium", featured: false,
+  },
+  {
+    id: 122, name: "Tissue Rolls Bale (40pc)", category: "Paper & Tissue",
+    price: 900, sizes: ["40PC Bale"], prices: [900],
+    image: "/images/products/tissue-rolls-bale.jpg",
+    description: "Bulk value bale of 40 tissue rolls for offices and homes.",
+    badge: null, featured: false,
+  },
+  {
+    id: 123, name: "Jumbo Tissue 800-Sheet – Recycled", category: "Paper & Tissue",
+    price: 1105, sizes: ["Recycled (12PC)"], prices: [1105],
+    image: "/images/products/jumbo-tissue-recycled.jpg",
+    description: "Recycled jumbo roll for commercial bathrooms and restrooms.",
+    badge: null, featured: false,
+  },
+  {
+    id: 124, name: "Jumbo Tissue 800-Sheet – Blended", category: "Paper & Tissue",
+    price: 1690, sizes: ["Blended (12PC)"], prices: [1690],
+    image: "/images/products/jumbo-tissue-blended.jpg",
+    description: "Blended jumbo roll — softer quality for premium restrooms.",
+    badge: null, featured: false,
+  },
+  {
+    id: 125, name: "Hand Towel Tissue", category: "Paper & Tissue",
+    price: 360, sizes: ["PKT 12"], prices: [360],
+    image: "/images/products/hand-towel-tissue.jpg",
+    description: "Absorbent hand towel tissues for washrooms and kitchens.",
+    badge: null, featured: false,
+  },
 ];
 
-const CATEGORIES = ["All", "Liquids", "Powders", "Cleaning Tools", "Air Fresheners", "Paper & Tissue", "Specialty"];
+const CATEGORIES = ["All", "Liquids", "Powders", "Cleaning Tools", "Air Fresheners", "Paper & Tissue"];
 const formatPrice = (p) => `KSh ${p.toLocaleString()}`;
 const WHATSAPP_NUMBER = "254727374142";
 
@@ -264,55 +945,26 @@ const CheckoutModal = ({ cart, open, onClose, dark }) => {
   );
 };
 
-// ─── REDESIGNED HERO SECTION ──────────────────────────────────────────────────
+// ─── HERO SECTION ─────────────────────────────────────────────────────────────
 const HeroSection = ({ onShop, dark }) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [prevSlide, setPrevSlide] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
 
   const slides = [
-    {
-      bg: "/images/hero/hero-slide-1.jpg",
-      accent: "#10b981",
-      accentDark: "#059669",
-      eyebrow: "Kenya's Favourite Cleaning Brand",
-      headline: "Clean Smarter.",
-      subheadline: "Live Better.",
-      sub: "Premium detergents & disinfectants, delivered across Kenya.",
-    },
-    {
-      bg: "/images/hero/hero-slide-2.jpg",
-      accent: "#0ea5e9",
-      accentDark: "#0284c7",
-      eyebrow: "Hospital-Grade Protection",
-      headline: "Kills 99.9%",
-      subheadline: "of All Germs.",
-      sub: "Professional disinfectants trusted by businesses and families alike.",
-    },
-    {
-      bg: "/images/hero/hero-slide-3.jpg",
-      accent: "#8b5cf6",
-      accentDark: "#7c3aed",
-      eyebrow: "Fresh Laundry Every Time",
-      headline: "Whites Whiter.",
-      subheadline: "Colors Brighter.",
-      sub: "Powerful laundry powders and liquids for outstanding results.",
-    },
+    { bg: "/images/hero/hero-slide-1.jpg", accent: "#10b981", accentDark: "#059669", eyebrow: "Kenya's Favourite Cleaning Brand", headline: "Clean Smarter.", subheadline: "Live Better.", sub: "Premium detergents & disinfectants, delivered across Kenya." },
+    { bg: "/images/hero/hero-slide-2.jpg", accent: "#0ea5e9", accentDark: "#0284c7", eyebrow: "Hospital-Grade Protection", headline: "Kills 99.9%", subheadline: "of All Germs.", sub: "Professional disinfectants trusted by businesses and families alike." },
+    { bg: "/images/hero/hero-slide-3.jpg", accent: "#8b5cf6", accentDark: "#7c3aed", eyebrow: "Fresh Laundry Every Time", headline: "Whites Whiter.", subheadline: "Colors Brighter.", sub: "Powerful laundry powders and liquids for outstanding results." },
   ];
 
   const goToSlide = (idx) => {
     if (idx === activeSlide || transitioning) return;
     setTransitioning(true);
-    setPrevSlide(activeSlide);
     setActiveSlide(idx);
-    setTimeout(() => { setPrevSlide(null); setTransitioning(false); }, 900);
+    setTimeout(() => setTransitioning(false), 900);
   };
 
   useEffect(() => {
-    const t = setInterval(() => {
-      const next = (activeSlide + 1) % slides.length;
-      goToSlide(next);
-    }, 6000);
+    const t = setInterval(() => goToSlide((activeSlide + 1) % slides.length), 6000);
     return () => clearInterval(t);
   }, [activeSlide, transitioning]);
 
@@ -331,14 +983,9 @@ const HeroSection = ({ onShop, dark }) => {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap');
-
         .ch-hero { font-family: 'DM Sans', system-ui, sans-serif; }
         .ch-headline { font-family: 'Bebas Neue', Impact, sans-serif; line-height: 0.88; letter-spacing: 0.01em; }
-
-        /* Slide BG crossfade */
         .ch-slide-bg { position: absolute; inset: 0; transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1); }
-
-        /* Content reveal on slide change */
         @keyframes ch-reveal { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
         .ch-reveal { animation: ch-reveal 0.75s cubic-bezier(0.22,1,0.36,1) forwards; }
         .ch-reveal-1 { animation-delay: 0.05s; }
@@ -346,193 +993,84 @@ const HeroSection = ({ onShop, dark }) => {
         .ch-reveal-3 { animation-delay: 0.25s; }
         .ch-reveal-4 { animation-delay: 0.35s; }
         .ch-reveal-5 { animation-delay: 0.45s; }
-
-        /* Mosaic float */
-        @keyframes ch-float { 0%,100% { transform: translateY(0px) rotate(var(--r,0deg)); } 50% { transform: translateY(-10px) rotate(var(--r,0deg)); } }
+        @keyframes ch-float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .ch-float { animation: ch-float 7s ease-in-out infinite; }
         .ch-float-2 { animation-duration: 8.5s; animation-delay: 1s; }
         .ch-float-3 { animation-duration: 6.5s; animation-delay: 2s; }
         .ch-float-4 { animation-duration: 9s; animation-delay: 0.5s; }
-
-        /* CTA shimmer sweep */
         .ch-cta-primary { position: relative; overflow: hidden; }
         .ch-cta-primary::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.25) 50%, transparent 65%); transform: translateX(-100%) skewX(-10deg); transition: none; }
         .ch-cta-primary:hover::after { transform: translateX(200%) skewX(-10deg); transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
-
-        /* Ticker */
         @keyframes ch-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .ch-ticker { animation: ch-ticker 22s linear infinite; }
-
-        /* Stat bar grow */
         @keyframes ch-bar { from { width: 0; } to { width: var(--w); } }
         .ch-bar { animation: ch-bar 1.4s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; width: 0; }
-
-        /* Scroll cue */
         @keyframes ch-scroll { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(7px); opacity: 1; } }
         .ch-scroll { animation: ch-scroll 2.2s ease-in-out infinite; }
-
-        /* Noise grain */
         .ch-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
-
-        /* Pill tags pop */
         @keyframes ch-pop { from { opacity: 0; transform: scale(0.7) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .ch-pop { opacity: 0; animation: ch-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-
-        /* Mosaic label slide */
-        @keyframes ch-label { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .ch-label { animation: ch-label 0.5s ease forwards; }
-
-        /* Divider line */
         .ch-divider { height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); }
-
-        /* Number counter font */
         .ch-numeral { font-family: 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.05em; }
-
-        /* Review dots */
         @keyframes ch-star-in { from { opacity: 0; transform: scale(0) rotate(-20deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
         .ch-star { animation: ch-star-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
-
-        /* Vertical slide number */
         .ch-slide-num { writing-mode: vertical-rl; text-orientation: mixed; }
-
-        /* Mobile hero adjustments */
-        @media (max-width: 767px) {
-          .ch-mosaic-wrap { display: none; }
-          .ch-headline { font-size: clamp(58px, 14vw, 80px) !important; }
-        }
+        @media (max-width: 767px) { .ch-mosaic-wrap { display: none; } .ch-headline { font-size: clamp(58px, 14vw, 80px) !important; } }
       `}</style>
 
       <section className="ch-hero relative min-h-screen overflow-hidden bg-gray-950">
-
-        {/* ── BG SLIDES ── */}
         {slides.map((s, i) => (
           <div key={i} className="ch-slide-bg" style={{ opacity: i === activeSlide ? 1 : 0, zIndex: 0 }}>
-            <img src={s.bg} alt="" className="w-full h-full object-cover"
-              style={{ transform: i === activeSlide ? "scale(1.04)" : "scale(1)", transition: "transform 9s ease" }}
-              onError={e => { e.target.style.display = "none"; }} />
-            {/* Multi-layer cinematic overlay */}
+            <img src={s.bg} alt="" className="w-full h-full object-cover" style={{ transform: i === activeSlide ? "scale(1.04)" : "scale(1)", transition: "transform 9s ease" }} onError={e => { e.target.style.display = "none"; }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 45%, rgba(0,0,0,0.20) 100%)" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.10) 40%, transparent 70%)" }} />
             <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 65% 40%, ${s.accent}1a 0%, transparent 55%)` }} />
           </div>
         ))}
-
-        {/* Grain overlay */}
         <div className="ch-grain absolute inset-0 pointer-events-none" style={{ zIndex: 1 }} />
-
-        {/* Accent top bar */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] z-10"
-          style={{ background: `linear-gradient(to right, ${slide.accent}, ${slide.accentDark}, transparent)`, transition: "background 0.8s ease" }} />
-
-        {/* ── VERTICAL SLIDE COUNTER (desktop) ── */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] z-10" style={{ background: `linear-gradient(to right, ${slide.accent}, ${slide.accentDark}, transparent)`, transition: "background 0.8s ease" }} />
         <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-3">
-          <span className="ch-slide-num text-white/30 text-xs font-medium tracking-widest" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            0{activeSlide + 1} / 0{slides.length}
-          </span>
+          <span className="ch-slide-num text-white/30 text-xs font-medium tracking-widest" style={{ fontFamily: "'DM Sans', sans-serif" }}>0{activeSlide + 1} / 0{slides.length}</span>
           <div className="flex flex-col gap-2 mt-2">
             {slides.map((_, i) => (
-              <button key={i} onClick={() => goToSlide(i)}
-                className="transition-all duration-500 rounded-full"
-                style={{
-                  width: 3,
-                  height: i === activeSlide ? 32 : 12,
-                  background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.25)",
-                }} />
+              <button key={i} onClick={() => goToSlide(i)} className="transition-all duration-500 rounded-full" style={{ width: 3, height: i === activeSlide ? 32 : 12, background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.25)" }} />
             ))}
           </div>
         </div>
-
-        {/* ── MAIN CONTENT ── */}
         <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 min-h-screen flex flex-col">
-
-          {/* Top eyebrow row */}
           <div className="flex items-center justify-between pt-7 pb-2">
-            <div key={`eyebrow-${activeSlide}`} className="ch-reveal ch-reveal-1 flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold tracking-wide text-white/90"
-              style={{ borderColor: `${slide.accent}55`, background: `${slide.accent}18`, backdropFilter: "blur(12px)" }}>
-              <span style={{ color: slide.accent }}>◆</span>
-              {slide.eyebrow}
+            <div key={`eyebrow-${activeSlide}`} className="ch-reveal ch-reveal-1 flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold tracking-wide text-white/90" style={{ borderColor: `${slide.accent}55`, background: `${slide.accent}18`, backdropFilter: "blur(12px)" }}>
+              <span style={{ color: slide.accent }}>◆</span>{slide.eyebrow}
             </div>
-            {/* Dot nav (mobile + desktop) */}
             <div className="flex lg:hidden items-center gap-2">
               {slides.map((_, i) => (
-                <button key={i} onClick={() => goToSlide(i)}
-                  className="rounded-full transition-all duration-500"
-                  style={{ height: 6, width: i === activeSlide ? 24 : 6, background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.30)" }} />
+                <button key={i} onClick={() => goToSlide(i)} className="rounded-full transition-all duration-500" style={{ height: 6, width: i === activeSlide ? 24 : 6, background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.30)" }} />
               ))}
             </div>
           </div>
-
-          {/* Core layout */}
           <div className="flex-1 flex flex-col md:flex-row items-center gap-8 md:gap-12 py-6 md:py-10">
-
-            {/* ── LEFT: Text block ── */}
             <div className="flex-1 max-w-2xl">
               <div key={`content-${activeSlide}`}>
-
-                {/* Giant headline */}
-                <h1 className="ch-headline ch-reveal ch-reveal-1 text-white mb-0"
-                  style={{ fontSize: "clamp(68px, 10.5vw, 138px)" }}>
-                  {slide.headline}
-                </h1>
-                <h1 className="ch-headline ch-reveal ch-reveal-2 mb-5"
-                  style={{
-                    fontSize: "clamp(68px, 10.5vw, 138px)",
-                    color: slide.accent,
-                    textShadow: `0 0 80px ${slide.accent}66`,
-                    WebkitTextStroke: "0px"
-                  }}>
-                  {slide.subheadline}
-                </h1>
-
-                {/* Subtext */}
-                <p className="ch-reveal ch-reveal-3 text-white/65 text-base md:text-lg font-light leading-relaxed max-w-md mb-7"
-                  style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  {slide.sub}
-                </p>
-
-                {/* Category pills */}
+                <h1 className="ch-headline ch-reveal ch-reveal-1 text-white mb-0" style={{ fontSize: "clamp(68px, 10.5vw, 138px)" }}>{slide.headline}</h1>
+                <h1 className="ch-headline ch-reveal ch-reveal-2 mb-5" style={{ fontSize: "clamp(68px, 10.5vw, 138px)", color: slide.accent, textShadow: `0 0 80px ${slide.accent}66` }}>{slide.subheadline}</h1>
+                <p className="ch-reveal ch-reveal-3 text-white/65 text-base md:text-lg font-light leading-relaxed max-w-md mb-7" style={{ fontFamily: "'DM Sans', sans-serif" }}>{slide.sub}</p>
                 <div className="flex flex-wrap gap-2 mb-8">
                   {["Disinfectants","Handwash","Laundry","Air Fresheners","Tools","Glass Cleaner"].map((tag, i) => (
-                    <span key={tag} className="ch-pop text-xs px-3 py-1.5 rounded-full border text-white/75 font-medium"
-                      style={{
-                        animationDelay: `${0.3 + i * 0.07}s`,
-                        borderColor: "rgba(255,255,255,0.18)",
-                        background: "rgba(255,255,255,0.07)",
-                        backdropFilter: "blur(8px)"
-                      }}>
-                      {tag}
-                    </span>
+                    <span key={tag} className="ch-pop text-xs px-3 py-1.5 rounded-full border text-white/75 font-medium" style={{ animationDelay: `${0.3 + i * 0.07}s`, borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.07)", backdropFilter: "blur(8px)" }}>{tag}</span>
                   ))}
                 </div>
-
-                {/* CTA buttons */}
                 <div className="ch-reveal ch-reveal-4 flex flex-col sm:flex-row gap-3 mb-10">
-                  <button onClick={onShop}
-                    className="ch-cta-primary group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
-                    style={{ background: slide.accent, boxShadow: `0 10px 40px ${slide.accent}44` }}>
+                  <button onClick={onShop} className="ch-cta-primary group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]" style={{ background: slide.accent, boxShadow: `0 10px 40px ${slide.accent}44` }}>
                     Shop All Products
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                   </button>
-                  <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"
-                    className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white border transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
-                    style={{ borderColor: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.10)", backdropFilter: "blur(10px)" }}>
-                    <Icon.WhatsApp />
-                    WhatsApp Us
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white border transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]" style={{ borderColor: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.10)", backdropFilter: "blur(10px)" }}>
+                    <Icon.WhatsApp /> WhatsApp Us
                   </a>
                 </div>
-
-                {/* Divider */}
                 <div className="ch-divider mb-7" />
-
-                {/* Stats row */}
                 <div className="ch-reveal ch-reveal-5 flex gap-7 sm:gap-10">
-                  {[
-                    { value: "50+", label: "Products", w: "88%" },
-                    { value: "10K+", label: "Customers", w: "72%" },
-                    { value: "24h", label: "Delivery", w: "58%" }
-                  ].map(({ value, label, w }) => (
+                  {[{ value: "90+", label: "Products", w: "88%" }, { value: "10K+", label: "Customers", w: "72%" }, { value: "24h", label: "Delivery", w: "58%" }].map(({ value, label, w }) => (
                     <div key={label} className="flex-1">
                       <div className="ch-numeral text-white font-black mb-0.5" style={{ fontSize: "clamp(22px, 3.5vw, 34px)" }}>{value}</div>
                       <div className="text-white/45 text-xs font-medium mb-2 tracking-wide uppercase">{label}</div>
@@ -544,70 +1082,39 @@ const HeroSection = ({ onShop, dark }) => {
                 </div>
               </div>
             </div>
-
-            {/* ── RIGHT: Mosaic card grid ── */}
             <div className="ch-mosaic-wrap flex-shrink-0 relative w-[340px] h-[440px] md:w-[400px] md:h-[500px]">
-
-              {/* Central large card */}
-              <div className="ch-float absolute inset-x-10 inset-y-8 rounded-3xl overflow-hidden shadow-2xl"
-                style={{ boxShadow: "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)" }}>
-                <img src={mosaic[0].src} alt={mosaic[0].label} className="w-full h-full object-cover"
-                  onError={e => { e.target.style.background = "#111827"; e.target.src = ""; }} />
+              <div className="ch-float absolute inset-x-10 inset-y-8 rounded-3xl overflow-hidden shadow-2xl" style={{ boxShadow: "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)" }}>
+                <img src={mosaic[0].src} alt={mosaic[0].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#111827"; e.target.src = ""; }} />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)" }} />
                 <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
                   <div>
                     <p className="text-white text-xs font-bold tracking-wide uppercase opacity-70">{mosaic[0].label}</p>
                     <p className="text-white font-black text-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}>{mosaic[0].price}</p>
                   </div>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 border border-white/30">
-                    <Icon.Plus />
-                  </div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 border border-white/30"><Icon.Plus /></div>
                 </div>
               </div>
-
-              {/* Top-right card */}
-              <div className="ch-float ch-float-2 absolute top-0 right-0 w-[120px] h-[130px] md:w-[140px] md:h-[150px] rounded-2xl overflow-hidden shadow-xl"
-                style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
-                <img src={mosaic[1].src} alt={mosaic[1].label} className="w-full h-full object-cover"
-                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+              <div className="ch-float ch-float-2 absolute top-0 right-0 w-[120px] h-[130px] md:w-[140px] md:h-[150px] rounded-2xl overflow-hidden shadow-xl" style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[1].src} alt={mosaic[1].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
                 <p className="absolute bottom-2 left-3 text-white text-xs font-bold tracking-wide">{mosaic[1].label}</p>
               </div>
-
-              {/* Bottom-left card */}
-              <div className="ch-float ch-float-3 absolute bottom-0 left-0 w-[110px] h-[115px] md:w-[128px] md:h-[132px] rounded-2xl overflow-hidden shadow-xl"
-                style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
-                <img src={mosaic[2].src} alt={mosaic[2].label} className="w-full h-full object-cover"
-                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+              <div className="ch-float ch-float-3 absolute bottom-0 left-0 w-[110px] h-[115px] md:w-[128px] md:h-[132px] rounded-2xl overflow-hidden shadow-xl" style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[2].src} alt={mosaic[2].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
                 <p className="absolute bottom-2 left-3 text-white text-xs font-bold tracking-wide">{mosaic[2].label}</p>
               </div>
-
-              {/* Bottom-right card */}
-              <div className="ch-float ch-float-4 absolute bottom-1 right-1 w-[95px] h-[100px] md:w-[110px] md:h-[116px] rounded-2xl overflow-hidden shadow-xl"
-                style={{ boxShadow: "0 14px 40px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
-                <img src={mosaic[5].src} alt={mosaic[5].label} className="w-full h-full object-cover"
-                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+              <div className="ch-float ch-float-4 absolute bottom-1 right-1 w-[95px] h-[100px] md:w-[110px] md:h-[116px] rounded-2xl overflow-hidden shadow-xl" style={{ boxShadow: "0 14px 40px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[5].src} alt={mosaic[5].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
                 <p className="absolute bottom-2 left-2 text-white text-xs font-bold">{mosaic[5].label}</p>
               </div>
-
-              {/* Floating badge: Premium Quality */}
-              <div className="absolute -top-4 left-8 px-4 py-2 rounded-full text-xs font-bold text-white shadow-xl"
-                style={{ background: slide.accent, boxShadow: `0 8px 24px ${slide.accent}55`, transition: "background 0.6s ease" }}>
-                ✨ Premium Quality
-              </div>
-
-              {/* Floating card: price */}
-              <div className="ch-float ch-float-2 absolute top-14 -left-10 px-4 py-3 rounded-2xl bg-white shadow-2xl text-left min-w-[110px]"
-                style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.20)" }}>
+              <div className="absolute -top-4 left-8 px-4 py-2 rounded-full text-xs font-bold text-white shadow-xl" style={{ background: slide.accent, boxShadow: `0 8px 24px ${slide.accent}55`, transition: "background 0.6s ease" }}>✨ Premium Quality</div>
+              <div className="ch-float ch-float-2 absolute top-14 -left-10 px-4 py-3 rounded-2xl bg-white shadow-2xl text-left min-w-[110px]" style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.20)" }}>
                 <div className="text-gray-400 text-xs font-medium mb-0.5">Starting from</div>
-                <div className="font-black text-xl" style={{ color: slide.accent, fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}>KSh 90</div>
+                <div className="font-black text-xl" style={{ color: slide.accent, fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}>KSh 40</div>
               </div>
-
-              {/* Floating card: delivery */}
-              <div className="ch-float ch-float-3 absolute bottom-20 -right-6 md:-right-8 px-4 py-3 rounded-2xl bg-white shadow-2xl"
-                style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.18)" }}>
+              <div className="ch-float ch-float-3 absolute bottom-20 -right-6 md:-right-8 px-4 py-3 rounded-2xl bg-white shadow-2xl" style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.18)" }}>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🚚</span>
                   <div>
@@ -618,16 +1125,11 @@ const HeroSection = ({ onShop, dark }) => {
               </div>
             </div>
           </div>
-
-          {/* Bottom row: reviews + scroll */}
           <div className="flex items-end justify-between pb-8 flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              {/* Stars */}
               <div className="flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="ch-star w-4 h-4 fill-amber-400" style={{ animationDelay: `${0.6 + i * 0.08}s` }} viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
+                  <svg key={i} className="ch-star w-4 h-4 fill-amber-400" style={{ animationDelay: `${0.6 + i * 0.08}s` }} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 ))}
               </div>
               <div>
@@ -637,29 +1139,19 @@ const HeroSection = ({ onShop, dark }) => {
               <div className="hidden sm:flex items-center gap-2 pl-4 ml-2 border-l border-white/15">
                 <div className="flex -space-x-2">
                   {["#10b981","#0ea5e9","#8b5cf6","#f59e0b"].map((c, i) => (
-                    <div key={i} className="w-7 h-7 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white"
-                      style={{ background: c }}>
-                      {["N","A","M","K"][i]}
-                    </div>
+                    <div key={i} className="w-7 h-7 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white" style={{ background: c }}>{["N","A","M","K"][i]}</div>
                   ))}
                 </div>
                 <span className="text-white/50 text-xs">Trusted across Kenya</span>
               </div>
             </div>
-
-            {/* Scroll cue */}
             <button onClick={onShop} className="ch-scroll flex items-center gap-2 text-white/40 hover:text-white/80 transition-colors group">
               <span className="text-xs font-medium tracking-widest uppercase">Explore</span>
-              <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/50 transition-colors">
-                <Icon.ArrowDown />
-              </div>
+              <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/50 transition-colors"><Icon.ArrowDown /></div>
             </button>
           </div>
         </div>
-
-        {/* ── TICKER STRIP ── */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden flex items-center"
-          style={{ height: 40, background: slide.accent, transition: "background 0.8s ease" }}>
+        <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden flex items-center" style={{ height: 40, background: slide.accent, transition: "background 0.8s ease" }}>
           <div className="ch-ticker flex whitespace-nowrap items-center h-full">
             {[...Array(4)].map((_, rep) => (
               <span key={rep} className="inline-flex items-center gap-8 px-6 text-white text-xs font-bold tracking-widest uppercase">
@@ -696,43 +1188,14 @@ const FeaturedSection = ({ onAdd, addedIds, dark }) => {
   );
 };
 
-// ─── REDESIGNED WHY CHOOSE CLEANHUT ──────────────────────────────────────────
+// ─── WHY CHOOSE SECTION ───────────────────────────────────────────────────────
 const WhyChooseSection = ({ dark }) => {
   const pillars = [
-    {
-      icon: <Icon.Award />,
-      accent: "#10b981",
-      label: "Premium Quality",
-      headline: "Certified & Tested",
-      body: "Every product undergoes rigorous quality testing. You get professional-grade formulations, every single order.",
-      stat: "50+", statLabel: "Products",
-    },
-    {
-      icon: <Icon.Truck />,
-      accent: "#0ea5e9",
-      label: "Fast Delivery",
-      headline: "Same-Day Nairobi",
-      body: "Order before noon, receive before evening. We deliver across Nairobi and ship nationwide within 24 hours.",
-      stat: "24h", statLabel: "Delivery",
-    },
-    {
-      icon: <Icon.Tag />,
-      accent: "#f59e0b",
-      label: "Best Prices",
-      headline: "Wholesale for All",
-      body: "Skip the middlemen. Whether you're a home buyer or a business, you get factory-direct pricing on every order.",
-      stat: "KSh 90", statLabel: "Starting from",
-    },
-    {
-      icon: <Icon.Chat />,
-      accent: "#8b5cf6",
-      label: "24/7 Support",
-      headline: "Always on WhatsApp",
-      body: "Got a question? Drop us a WhatsApp any time of day. A real person responds fast — no bots, no waiting.",
-      stat: "< 5min", statLabel: "Response time",
-    },
+    { icon: <Icon.Award />, accent: "#10b981", label: "Premium Quality", headline: "Certified & Tested", body: "Every product undergoes rigorous quality testing. You get professional-grade formulations, every single order.", stat: "90+", statLabel: "Products" },
+    { icon: <Icon.Truck />, accent: "#0ea5e9", label: "Fast Delivery", headline: "Same-Day Nairobi", body: "Order before noon, receive before evening. We deliver across Nairobi and ship nationwide within 24 hours.", stat: "24h", statLabel: "Delivery" },
+    { icon: <Icon.Tag />, accent: "#f59e0b", label: "Best Prices", headline: "Wholesale for All", body: "Skip the middlemen. Whether you're a home buyer or a business, you get factory-direct pricing on every order.", stat: "KSh 40", statLabel: "Starting from" },
+    { icon: <Icon.Chat />, accent: "#8b5cf6", label: "24/7 Support", headline: "Always on WhatsApp", body: "Got a question? Drop us a WhatsApp any time of day. A real person responds fast — no bots, no waiting.", stat: "< 5min", statLabel: "Response time" },
   ];
-
   return (
     <>
       <style>{`
@@ -748,78 +1211,41 @@ const WhyChooseSection = ({ dark }) => {
         .wc-numeral { font-family: 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.04em; }
         .wc-header-line { height: 3px; border-radius: 2px; }
       `}</style>
-
       <section className={`relative py-20 md:py-28 overflow-hidden ${dark ? "bg-gray-950" : "bg-white"}`}>
-
-        {/* Subtle BG pattern */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-          style={{ backgroundImage: "radial-gradient(circle, #10b981 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-
-        {/* Emerald glow blob (decorative) */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #10b98118 0%, transparent 70%)" }} />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #0ea5e914 0%, transparent 70%)" }} />
-
+        <div className="absolute inset-0 pointer-events-none opacity-[0.025]" style={{ backgroundImage: "radial-gradient(circle, #10b981 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, #10b98118 0%, transparent 70%)" }} />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, #0ea5e914 0%, transparent 70%)" }} />
         <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
-
-          {/* ── Section header ── */}
           <div className="mb-14 md:mb-18">
             <div className="flex items-center gap-3 mb-4">
               <div className="wc-header-line w-8 bg-emerald-500" />
-              <span className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-emerald-400" : "text-emerald-600"}`}>
-                Why CleanHut
-              </span>
+              <span className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-emerald-400" : "text-emerald-600"}`}>Why CleanHut</span>
             </div>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
               <div>
-                <h2 className={`text-4xl md:text-5xl font-black leading-tight mb-3 ${dark ? "text-white" : "text-gray-950"}`}
-                  style={{ fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: "0.01em" }}>
-                  Trusted By Thousands<br />
-                  <span className="text-emerald-500">Across Kenya.</span>
+                <h2 className={`text-4xl md:text-5xl font-black leading-tight mb-3 ${dark ? "text-white" : "text-gray-950"}`} style={{ fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: "0.01em" }}>
+                  Trusted By Thousands<br /><span className="text-emerald-500">Across Kenya.</span>
                 </h2>
-                <p className={`text-base max-w-lg leading-relaxed ${dark ? "text-gray-400" : "text-gray-500"}`}>
-                  From homes in Westlands to factories in Industrial Area — CleanHut is the cleaning partner Kenya relies on every day.
-                </p>
+                <p className={`text-base max-w-lg leading-relaxed ${dark ? "text-gray-400" : "text-gray-500"}`}>From homes in Westlands to factories in Industrial Area — CleanHut is the cleaning partner Kenya relies on every day.</p>
               </div>
-              {/* CTA */}
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"
-                className="flex-shrink-0 self-start md:self-auto flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-emerald-200">
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="flex-shrink-0 self-start md:self-auto flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-emerald-200">
                 <Icon.WhatsApp /> Order on WhatsApp
               </a>
             </div>
           </div>
-
-          {/* ── 4 pillar cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {pillars.map((p, i) => (
-              <div key={p.label}
-                className={`wc-card wc-reveal relative rounded-3xl p-6 flex flex-col gap-5 overflow-hidden ${dark ? "bg-gray-900 border border-gray-800" : "bg-gray-50 border border-gray-100"}`}
-                style={{ animationDelay: `${0.1 + i * 0.1}s`, boxShadow: dark ? "none" : "0 2px 20px rgba(0,0,0,0.05)" }}>
-
-                {/* Corner accent glow */}
-                <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${p.accent}22 0%, transparent 70%)` }} />
-
-                {/* Icon ring */}
-                <div className="wc-icon-ring w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${p.accent}18`, color: p.accent, border: `1.5px solid ${p.accent}30` }}>
-                  {p.icon}
-                </div>
-
-                {/* Label badge */}
+              <div key={p.label} className={`wc-card wc-reveal relative rounded-3xl p-6 flex flex-col gap-5 overflow-hidden ${dark ? "bg-gray-900 border border-gray-800" : "bg-gray-50 border border-gray-100"}`} style={{ animationDelay: `${0.1 + i * 0.1}s`, boxShadow: dark ? "none" : "0 2px 20px rgba(0,0,0,0.05)" }}>
+                <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${p.accent}22 0%, transparent 70%)` }} />
+                <div className="wc-icon-ring w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${p.accent}18`, color: p.accent, border: `1.5px solid ${p.accent}30` }}>{p.icon}</div>
                 <div className="flex items-center gap-2">
                   <div className="wc-bar h-[2px] w-6 rounded-full flex-shrink-0" style={{ background: p.accent }} />
                   <span className="text-xs font-bold uppercase tracking-widest" style={{ color: p.accent }}>{p.label}</span>
                 </div>
-
-                {/* Text */}
                 <div className="flex-1">
                   <h3 className={`font-extrabold text-lg mb-2 leading-snug ${dark ? "text-white" : "text-gray-900"}`}>{p.headline}</h3>
                   <p className={`text-sm leading-relaxed ${dark ? "text-gray-400" : "text-gray-500"}`}>{p.body}</p>
                 </div>
-
-                {/* Stat */}
                 <div className={`pt-4 mt-auto border-t ${dark ? "border-gray-800" : "border-gray-100"}`}>
                   <div className="wc-numeral leading-none mb-0.5" style={{ fontSize: 28, color: p.accent }}>{p.stat}</div>
                   <div className={`text-xs font-medium uppercase tracking-wide ${dark ? "text-gray-500" : "text-gray-400"}`}>{p.statLabel}</div>
@@ -827,17 +1253,11 @@ const WhyChooseSection = ({ dark }) => {
               </div>
             ))}
           </div>
-
-          {/* ── Social proof band ── */}
           <div className={`mt-12 rounded-3xl px-7 py-5 flex flex-col sm:flex-row items-center justify-between gap-5 ${dark ? "bg-gray-900 border border-gray-800" : "bg-emerald-50 border border-emerald-100"}`}>
             <div className="flex items-center gap-4">
-              {/* Avatar stack */}
               <div className="flex -space-x-3">
                 {["#10b981","#0ea5e9","#f59e0b","#8b5cf6","#ef4444"].map((c, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-extrabold text-white"
-                    style={{ background: c, borderColor: dark ? "#030712" : "#f0fdf4" }}>
-                    {["N","A","W","M","J"][i]}
-                  </div>
+                  <div key={i} className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-extrabold text-white" style={{ background: c, borderColor: dark ? "#030712" : "#f0fdf4" }}>{["N","A","W","M","J"][i]}</div>
                 ))}
               </div>
               <div>
@@ -847,9 +1267,7 @@ const WhyChooseSection = ({ dark }) => {
             </div>
             <div className="flex items-center gap-4 flex-shrink-0">
               <div className="flex flex-col items-center">
-                <div className="flex gap-0.5 mb-1">
-                  {[...Array(5)].map((_,i) => <svg key={i} className="w-4 h-4 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}
-                </div>
+                <div className="flex gap-0.5 mb-1">{[...Array(5)].map((_,i) => <svg key={i} className="w-4 h-4 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
                 <span className={`text-xs font-semibold ${dark ? "text-gray-300" : "text-gray-600"}`}>4.9 average rating</span>
               </div>
               <div className={`w-px h-10 ${dark ? "bg-gray-700" : "bg-emerald-200"}`} />
@@ -992,7 +1410,6 @@ export default function App() {
         )}
       </section>
 
-      {/* REDESIGNED WHY CHOOSE SECTION */}
       <WhyChooseSection dark={dark} />
 
       <footer className={`py-12 ${dark ? "bg-gray-900 border-t border-gray-800" : "bg-gray-900"}`}>
@@ -1007,15 +1424,14 @@ export default function App() {
                 </div>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">Your trusted source for premium cleaning products across Kenya.</p>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-105">
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-sm transition-all hover:scale-105">
                 <Icon.WhatsApp /> Chat on WhatsApp
               </a>
             </div>
             <div>
               <h4 className="text-white font-bold mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                {["All Products","Liquids","Powders","Cleaning Tools","Air Fresheners"].map(l => (
+                {["All Products","Liquids","Powders","Cleaning Tools","Air Fresheners","Paper & Tissue"].map(l => (
                   <li key={l}><button onClick={() => { setCategory(l === "All Products" ? "All" : l); shopRef.current?.scrollIntoView({ behavior: "smooth" }); }} className="text-gray-400 hover:text-emerald-400 text-sm transition-colors flex items-center gap-1"><Icon.ChevronRight />{l}</button></li>
                 ))}
               </ul>
