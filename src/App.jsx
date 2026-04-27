@@ -98,6 +98,11 @@ const Icon = {
   ChevronRight: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
   ArrowDown: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>,
   Sparkle: () => <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/></svg>,
+  Shield: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>,
+  Truck: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM1 1h4l2.68 13.39a2 2 0 001.98 1.61H17a2 2 0 001.98-1.71l1.38-9.09H2"/></svg>,
+  Tag: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>,
+  Chat: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>,
+  Award: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>,
 };
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
@@ -259,165 +264,280 @@ const CheckoutModal = ({ cart, open, onClose, dark }) => {
   );
 };
 
-// ─── HERO SECTION ─────────────────────────────────────────────────────────────
-// Hero slide background images → save your Pinterest downloads as:
-//   /public/images/hero/hero-slide-1.jpg   (e.g. cleaning products flat lay)
-//   /public/images/hero/hero-slide-2.jpg   (e.g. disinfectant / antibacterial theme)
-//   /public/images/hero/hero-slide-3.jpg   (e.g. laundry / washing powder theme)
-//
-// Mosaic images (the floating product cards on the right) → save as:
-//   /public/images/mosaic/mosaic-1.jpg     (handwash bottle)
-//   /public/images/mosaic/mosaic-2.jpg     (sanitizer)
-//   /public/images/mosaic/mosaic-3.jpg     (laundry powder)
-//   /public/images/mosaic/mosaic-4.jpg     (toilet cleaner)
-//   /public/images/mosaic/mosaic-5.jpg     (disinfectant)
-//   /public/images/mosaic/mosaic-6.jpg     (shower gel)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── REDESIGNED HERO SECTION ──────────────────────────────────────────────────
 const HeroSection = ({ onShop, dark }) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+  const [prevSlide, setPrevSlide] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
 
   const slides = [
     {
       bg: "/images/hero/hero-slide-1.jpg",
       accent: "#10b981",
-      tag: "🧴 Kenya's #1 Cleaning Brand",
-      headline: ["Clean Smarter,", "Live Better."],
-      sub: "Premium detergents & disinfectants delivered across Kenya",
+      accentDark: "#059669",
+      eyebrow: "Kenya's Favourite Cleaning Brand",
+      headline: "Clean Smarter.",
+      subheadline: "Live Better.",
+      sub: "Premium detergents & disinfectants, delivered across Kenya.",
     },
     {
       bg: "/images/hero/hero-slide-2.jpg",
       accent: "#0ea5e9",
-      tag: "🦠 Hospital-Grade Protection",
-      headline: ["Kills 99.9%", "of Germs."],
-      sub: "Professional disinfectants trusted by businesses & homes",
+      accentDark: "#0284c7",
+      eyebrow: "Hospital-Grade Protection",
+      headline: "Kills 99.9%",
+      subheadline: "of All Germs.",
+      sub: "Professional disinfectants trusted by businesses and families alike.",
     },
     {
       bg: "/images/hero/hero-slide-3.jpg",
       accent: "#8b5cf6",
-      tag: "👕 Fresh Laundry Every Time",
-      headline: ["Whites Whiter,", "Colors Brighter."],
-      sub: "Powerful laundry powders & liquids for outstanding results",
+      accentDark: "#7c3aed",
+      eyebrow: "Fresh Laundry Every Time",
+      headline: "Whites Whiter.",
+      subheadline: "Colors Brighter.",
+      sub: "Powerful laundry powders and liquids for outstanding results.",
     },
   ];
 
+  const goToSlide = (idx) => {
+    if (idx === activeSlide || transitioning) return;
+    setTransitioning(true);
+    setPrevSlide(activeSlide);
+    setActiveSlide(idx);
+    setTimeout(() => { setPrevSlide(null); setTransitioning(false); }, 900);
+  };
+
   useEffect(() => {
-    setIsVisible(true);
-    const t = setInterval(() => setActiveSlide(s => (s + 1) % slides.length), 5000);
+    const t = setInterval(() => {
+      const next = (activeSlide + 1) % slides.length;
+      goToSlide(next);
+    }, 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [activeSlide, transitioning]);
 
   const slide = slides[activeSlide];
 
   const mosaic = [
-    { src: "/images/mosaic/mosaic-1.jpg", label: "Handwash" },
-    { src: "/images/mosaic/mosaic-2.jpg", label: "Sanitizer" },
-    { src: "/images/mosaic/mosaic-3.jpg", label: "Laundry" },
-    { src: "/images/mosaic/mosaic-4.jpg", label: "Toilet Cleaner" },
-    { src: "/images/mosaic/mosaic-5.jpg", label: "Disinfectant" },
-    { src: "/images/mosaic/mosaic-6.jpg", label: "Shower Gel" },
+    { src: "/images/mosaic/mosaic-1.jpg", label: "Handwash", price: "KSh 100" },
+    { src: "/images/mosaic/mosaic-2.jpg", label: "Sanitizer", price: "KSh 90" },
+    { src: "/images/mosaic/mosaic-3.jpg", label: "Laundry", price: "KSh 2,500" },
+    { src: "/images/mosaic/mosaic-4.jpg", label: "Toilet Cleaner", price: "KSh 200" },
+    { src: "/images/mosaic/mosaic-5.jpg", label: "Disinfectant", price: "KSh 130" },
+    { src: "/images/mosaic/mosaic-6.jpg", label: "Shower Gel", price: "KSh 300" },
   ];
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-        .hero-bg { transition: opacity 1.2s cubic-bezier(0.4,0,0.2,1); }
-        .hero-text-enter { animation: heroTextIn 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
-        @keyframes heroTextIn { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
-        .mosaic-item { animation: mosaicFloat 6s ease-in-out infinite; }
-        .mosaic-item:nth-child(2) { animation-delay: 0.8s; }
-        .mosaic-item:nth-child(3) { animation-delay: 1.6s; }
-        .mosaic-item:nth-child(4) { animation-delay: 0.4s; }
-        .mosaic-item:nth-child(5) { animation-delay: 1.2s; }
-        .mosaic-item:nth-child(6) { animation-delay: 2s; }
-        @keyframes mosaicFloat { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
-        .stat-bar { animation: statGrow 1.5s cubic-bezier(0.22,1,0.36,1) 0.6s forwards; width: 0%; }
-        @keyframes statGrow { to { width: var(--target-w); } }
-        .hero-shimmer { background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.07) 50%, transparent 60%); background-size: 200% 100%; animation: shimmer 3s ease infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .slide-dot.active { width: 28px; background: white; }
-        .product-tag-pill { animation: tagPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
-        @keyframes tagPop { to { opacity: 1; transform: scale(1); } from { transform: scale(0.7); } }
-        .scroll-cue { animation: scrollBounce 2s ease-in-out infinite; }
-        @keyframes scrollBounce { 0%,100% { transform: translateY(0); opacity: 0.7; } 50% { transform: translateY(8px); opacity: 1; } }
-        .noise-overlay { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); }
-        .hero-headline { font-family: 'Bebas Neue', 'Impact', sans-serif; line-height: 0.92; letter-spacing: 0.02em; }
-        .hero-body { font-family: 'DM Sans', system-ui, sans-serif; }
-        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap');
+
+        .ch-hero { font-family: 'DM Sans', system-ui, sans-serif; }
+        .ch-headline { font-family: 'Bebas Neue', Impact, sans-serif; line-height: 0.88; letter-spacing: 0.01em; }
+
+        /* Slide BG crossfade */
+        .ch-slide-bg { position: absolute; inset: 0; transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Content reveal on slide change */
+        @keyframes ch-reveal { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .ch-reveal { animation: ch-reveal 0.75s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .ch-reveal-1 { animation-delay: 0.05s; }
+        .ch-reveal-2 { animation-delay: 0.15s; }
+        .ch-reveal-3 { animation-delay: 0.25s; }
+        .ch-reveal-4 { animation-delay: 0.35s; }
+        .ch-reveal-5 { animation-delay: 0.45s; }
+
+        /* Mosaic float */
+        @keyframes ch-float { 0%,100% { transform: translateY(0px) rotate(var(--r,0deg)); } 50% { transform: translateY(-10px) rotate(var(--r,0deg)); } }
+        .ch-float { animation: ch-float 7s ease-in-out infinite; }
+        .ch-float-2 { animation-duration: 8.5s; animation-delay: 1s; }
+        .ch-float-3 { animation-duration: 6.5s; animation-delay: 2s; }
+        .ch-float-4 { animation-duration: 9s; animation-delay: 0.5s; }
+
+        /* CTA shimmer sweep */
+        .ch-cta-primary { position: relative; overflow: hidden; }
+        .ch-cta-primary::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.25) 50%, transparent 65%); transform: translateX(-100%) skewX(-10deg); transition: none; }
+        .ch-cta-primary:hover::after { transform: translateX(200%) skewX(-10deg); transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Ticker */
+        @keyframes ch-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .ch-ticker { animation: ch-ticker 22s linear infinite; }
+
+        /* Stat bar grow */
+        @keyframes ch-bar { from { width: 0; } to { width: var(--w); } }
+        .ch-bar { animation: ch-bar 1.4s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; width: 0; }
+
+        /* Scroll cue */
+        @keyframes ch-scroll { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(7px); opacity: 1; } }
+        .ch-scroll { animation: ch-scroll 2.2s ease-in-out infinite; }
+
+        /* Noise grain */
+        .ch-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+
+        /* Pill tags pop */
+        @keyframes ch-pop { from { opacity: 0; transform: scale(0.7) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .ch-pop { opacity: 0; animation: ch-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+        /* Mosaic label slide */
+        @keyframes ch-label { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .ch-label { animation: ch-label 0.5s ease forwards; }
+
+        /* Divider line */
+        .ch-divider { height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); }
+
+        /* Number counter font */
+        .ch-numeral { font-family: 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.05em; }
+
+        /* Review dots */
+        @keyframes ch-star-in { from { opacity: 0; transform: scale(0) rotate(-20deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
+        .ch-star { animation: ch-star-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
+
+        /* Vertical slide number */
+        .ch-slide-num { writing-mode: vertical-rl; text-orientation: mixed; }
+
+        /* Mobile hero adjustments */
+        @media (max-width: 767px) {
+          .ch-mosaic-wrap { display: none; }
+          .ch-headline { font-size: clamp(58px, 14vw, 80px) !important; }
+        }
       `}</style>
 
-      <section className="relative min-h-screen overflow-hidden" style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <section className="ch-hero relative min-h-screen overflow-hidden bg-gray-950">
+
+        {/* ── BG SLIDES ── */}
         {slides.map((s, i) => (
-          <div key={i} className="absolute inset-0 hero-bg" style={{ opacity: i === activeSlide ? 1 : 0, zIndex: 0 }}>
-            <img src={s.bg} alt="" className="w-full h-full object-cover scale-105"
-              style={{ transition: "transform 8s ease", transform: i === activeSlide ? "scale(1.05)" : "scale(1)" }}
+          <div key={i} className="ch-slide-bg" style={{ opacity: i === activeSlide ? 1 : 0, zIndex: 0 }}>
+            <img src={s.bg} alt="" className="w-full h-full object-cover"
+              style={{ transform: i === activeSlide ? "scale(1.04)" : "scale(1)", transition: "transform 9s ease" }}
               onError={e => { e.target.style.display = "none"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(110deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.25) 100%)" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%)" }} />
-            <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 70% 50%, ${s.accent}22 0%, transparent 60%)` }} />
+            {/* Multi-layer cinematic overlay */}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 45%, rgba(0,0,0,0.20) 100%)" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.10) 40%, transparent 70%)" }} />
+            <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 65% 40%, ${s.accent}1a 0%, transparent 55%)` }} />
           </div>
         ))}
 
-        <div className="absolute inset-0 noise-overlay pointer-events-none" style={{ zIndex: 1 }} />
-        <div className="absolute top-0 left-0 right-0 h-1 z-10" style={{ background: `linear-gradient(to right, ${slide.accent}, transparent)` }} />
+        {/* Grain overlay */}
+        <div className="ch-grain absolute inset-0 pointer-events-none" style={{ zIndex: 1 }} />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 min-h-screen flex flex-col">
-          <div className="flex items-center justify-between pt-8 pb-4 hero-text-enter" style={{ animationDelay: "0.1s" }}>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md bg-white/10 text-white text-xs font-semibold tracking-wide hero-shimmer">
-              <Icon.Sparkle />
-              {slide.tag}
+        {/* Accent top bar */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] z-10"
+          style={{ background: `linear-gradient(to right, ${slide.accent}, ${slide.accentDark}, transparent)`, transition: "background 0.8s ease" }} />
+
+        {/* ── VERTICAL SLIDE COUNTER (desktop) ── */}
+        <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-3">
+          <span className="ch-slide-num text-white/30 text-xs font-medium tracking-widest" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            0{activeSlide + 1} / 0{slides.length}
+          </span>
+          <div className="flex flex-col gap-2 mt-2">
+            {slides.map((_, i) => (
+              <button key={i} onClick={() => goToSlide(i)}
+                className="transition-all duration-500 rounded-full"
+                style={{
+                  width: 3,
+                  height: i === activeSlide ? 32 : 12,
+                  background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.25)",
+                }} />
+            ))}
+          </div>
+        </div>
+
+        {/* ── MAIN CONTENT ── */}
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 min-h-screen flex flex-col">
+
+          {/* Top eyebrow row */}
+          <div className="flex items-center justify-between pt-7 pb-2">
+            <div key={`eyebrow-${activeSlide}`} className="ch-reveal ch-reveal-1 flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold tracking-wide text-white/90"
+              style={{ borderColor: `${slide.accent}55`, background: `${slide.accent}18`, backdropFilter: "blur(12px)" }}>
+              <span style={{ color: slide.accent }}>◆</span>
+              {slide.eyebrow}
             </div>
-            <div className="flex items-center gap-2">
+            {/* Dot nav (mobile + desktop) */}
+            <div className="flex lg:hidden items-center gap-2">
               {slides.map((_, i) => (
-                <button key={i} onClick={() => setActiveSlide(i)}
-                  className={`slide-dot h-2 rounded-full transition-all duration-500 bg-white/40 ${i === activeSlide ? "active" : "w-2"}`}
-                  style={i === activeSlide ? { width: 28, background: "white" } : { width: 8 }}
-                />
+                <button key={i} onClick={() => goToSlide(i)}
+                  className="rounded-full transition-all duration-500"
+                  style={{ height: 6, width: i === activeSlide ? 24 : 6, background: i === activeSlide ? slide.accent : "rgba(255,255,255,0.30)" }} />
               ))}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col md:flex-row items-center gap-10 py-8">
-            <div className="flex-1 max-w-xl">
-              <div key={activeSlide} className="hero-text-enter">
-                <h1 className="hero-headline text-white mb-4" style={{ fontSize: "clamp(64px, 9vw, 120px)" }}>
-                  {slide.headline[0]}<br />
-                  <span style={{ color: slide.accent, WebkitTextStroke: "0px", textShadow: `0 0 60px ${slide.accent}88` }}>
-                    {slide.headline[1]}
-                  </span>
+          {/* Core layout */}
+          <div className="flex-1 flex flex-col md:flex-row items-center gap-8 md:gap-12 py-6 md:py-10">
+
+            {/* ── LEFT: Text block ── */}
+            <div className="flex-1 max-w-2xl">
+              <div key={`content-${activeSlide}`}>
+
+                {/* Giant headline */}
+                <h1 className="ch-headline ch-reveal ch-reveal-1 text-white mb-0"
+                  style={{ fontSize: "clamp(68px, 10.5vw, 138px)" }}>
+                  {slide.headline}
                 </h1>
-                <p className="hero-body text-white/75 text-lg mb-8 font-light leading-relaxed max-w-sm">{slide.sub}</p>
+                <h1 className="ch-headline ch-reveal ch-reveal-2 mb-5"
+                  style={{
+                    fontSize: "clamp(68px, 10.5vw, 138px)",
+                    color: slide.accent,
+                    textShadow: `0 0 80px ${slide.accent}66`,
+                    WebkitTextStroke: "0px"
+                  }}>
+                  {slide.subheadline}
+                </h1>
+
+                {/* Subtext */}
+                <p className="ch-reveal ch-reveal-3 text-white/65 text-base md:text-lg font-light leading-relaxed max-w-md mb-7"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                  {slide.sub}
+                </p>
+
+                {/* Category pills */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {["Disinfectants", "Handwash", "Laundry", "Air Fresheners", "Tools"].map((tag, i) => (
-                    <span key={tag} className="product-tag-pill text-xs px-3 py-1.5 rounded-full border border-white/25 text-white/80 backdrop-blur-sm bg-white/10 font-medium"
-                      style={{ animationDelay: `${0.3 + i * 0.08}s` }}>
+                  {["Disinfectants","Handwash","Laundry","Air Fresheners","Tools","Glass Cleaner"].map((tag, i) => (
+                    <span key={tag} className="ch-pop text-xs px-3 py-1.5 rounded-full border text-white/75 font-medium"
+                      style={{
+                        animationDelay: `${0.3 + i * 0.07}s`,
+                        borderColor: "rgba(255,255,255,0.18)",
+                        background: "rgba(255,255,255,0.07)",
+                        backdropFilter: "blur(8px)"
+                      }}>
                       {tag}
                     </span>
                   ))}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 mb-10">
+
+                {/* CTA buttons */}
+                <div className="ch-reveal ch-reveal-4 flex flex-col sm:flex-row gap-3 mb-10">
                   <button onClick={onShop}
-                    className="group relative overflow-hidden px-8 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-105 active:scale-95"
-                    style={{ background: slide.accent, color: "#fff", boxShadow: `0 8px 32px ${slide.accent}55` }}>
-                    <span className="relative z-10 flex items-center gap-2">
-                      Shop All Products
-                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </span>
-                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
+                    className="ch-cta-primary group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+                    style={{ background: slide.accent, boxShadow: `0 10px 40px ${slide.accent}44` }}>
+                    Shop All Products
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
                   </button>
                   <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"
-                    className="group flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-base bg-white/15 border border-white/30 text-white backdrop-blur-sm hover:bg-white/25 hover:scale-105 active:scale-95 transition-all duration-300">
-                    <Icon.WhatsApp /> WhatsApp Us
+                    className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-base text-white border transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+                    style={{ borderColor: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.10)", backdropFilter: "blur(10px)" }}>
+                    <Icon.WhatsApp />
+                    WhatsApp Us
                   </a>
                 </div>
-                <div className="flex gap-6 border-t border-white/15 pt-6">
-                  {[{ value: "50+", label: "Products", w: "90%" }, { value: "10K+", label: "Customers", w: "75%" }, { value: "24h", label: "Delivery", w: "60%" }].map(({ value, label, w }) => (
+
+                {/* Divider */}
+                <div className="ch-divider mb-7" />
+
+                {/* Stats row */}
+                <div className="ch-reveal ch-reveal-5 flex gap-7 sm:gap-10">
+                  {[
+                    { value: "50+", label: "Products", w: "88%" },
+                    { value: "10K+", label: "Customers", w: "72%" },
+                    { value: "24h", label: "Delivery", w: "58%" }
+                  ].map(({ value, label, w }) => (
                     <div key={label} className="flex-1">
-                      <div className="text-white font-black text-xl mb-1" style={{ fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: "0.04em" }}>{value}</div>
-                      <div className="text-white/50 text-xs mb-2 font-medium">{label}</div>
-                      <div className="h-0.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="stat-bar h-full rounded-full" style={{ "--target-w": w, background: slide.accent }} />
+                      <div className="ch-numeral text-white font-black mb-0.5" style={{ fontSize: "clamp(22px, 3.5vw, 34px)" }}>{value}</div>
+                      <div className="text-white/45 text-xs font-medium mb-2 tracking-wide uppercase">{label}</div>
+                      <div className="h-px bg-white/10 overflow-hidden rounded-full">
+                        <div className="ch-bar h-full rounded-full" style={{ "--w": w, background: slide.accent }} />
                       </div>
                     </div>
                   ))}
@@ -425,68 +545,126 @@ const HeroSection = ({ onShop, dark }) => {
               </div>
             </div>
 
-            <div className="flex-1 flex justify-center items-center">
-              <div className="relative w-72 h-80 md:w-96 md:h-[420px]">
-                <div className="absolute inset-x-8 inset-y-8 rounded-3xl overflow-hidden shadow-2xl border border-white/20 mosaic-item"
-                  style={{ animationDelay: "0s", boxShadow: "0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                  <img src={mosaic[0].src} alt={mosaic[0].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }} />
-                  <span className="absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">{mosaic[0].label}</span>
+            {/* ── RIGHT: Mosaic card grid ── */}
+            <div className="ch-mosaic-wrap flex-shrink-0 relative w-[340px] h-[440px] md:w-[400px] md:h-[500px]">
+
+              {/* Central large card */}
+              <div className="ch-float absolute inset-x-10 inset-y-8 rounded-3xl overflow-hidden shadow-2xl"
+                style={{ boxShadow: "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)" }}>
+                <img src={mosaic[0].src} alt={mosaic[0].label} className="w-full h-full object-cover"
+                  onError={e => { e.target.style.background = "#111827"; e.target.src = ""; }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)" }} />
+                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                  <div>
+                    <p className="text-white text-xs font-bold tracking-wide uppercase opacity-70">{mosaic[0].label}</p>
+                    <p className="text-white font-black text-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}>{mosaic[0].price}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 border border-white/30">
+                    <Icon.Plus />
+                  </div>
                 </div>
-                <div className="absolute top-0 right-0 w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden shadow-xl border border-white/20 mosaic-item" style={{ animationDelay: "0.6s" }}>
-                  <img src={mosaic[1].src} alt={mosaic[1].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <span className="absolute bottom-2 left-2 text-white text-xs font-semibold">{mosaic[1].label}</span>
-                </div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-xl border border-white/20 mosaic-item" style={{ animationDelay: "1.2s" }}>
-                  <img src={mosaic[2].src} alt={mosaic[2].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <span className="absolute bottom-2 left-2 text-white text-xs font-semibold">{mosaic[2].label}</span>
-                </div>
-                <div className="absolute bottom-2 right-2 w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden shadow-xl border border-white/20 mosaic-item" style={{ animationDelay: "1.8s" }}>
-                  <img src={mosaic[5].src} alt={mosaic[5].label} className="w-full h-full object-cover" onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <span className="absolute bottom-2 left-2 text-white text-xs font-semibold">{mosaic[5].label}</span>
-                </div>
-                <div className="absolute -top-3 left-4 px-3 py-1.5 rounded-full text-xs font-bold text-white border border-white/30 backdrop-blur-md shadow-lg" style={{ background: slide.accent }}>
-                  ✨ Premium Quality
-                </div>
-                <div className="absolute top-12 -left-6 md:-left-8 px-3 py-2 rounded-xl bg-white shadow-2xl text-xs font-bold text-gray-800 border border-gray-100 mosaic-item" style={{ animationDelay: "2.4s" }}>
-                  <div className="text-emerald-600 font-black text-base">KSh 100</div>
-                  <div className="text-gray-500 text-xs">From only</div>
-                </div>
-                <div className="absolute bottom-16 -right-4 md:-right-6 px-3 py-2 rounded-xl bg-white shadow-2xl text-xs font-bold text-gray-800 mosaic-item" style={{ animationDelay: "0.9s" }}>
-                  <div className="text-emerald-600">🚚 Same Day</div>
-                  <div className="text-gray-500 font-normal">Nairobi delivery</div>
+              </div>
+
+              {/* Top-right card */}
+              <div className="ch-float ch-float-2 absolute top-0 right-0 w-[120px] h-[130px] md:w-[140px] md:h-[150px] rounded-2xl overflow-hidden shadow-xl"
+                style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[1].src} alt={mosaic[1].label} className="w-full h-full object-cover"
+                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
+                <p className="absolute bottom-2 left-3 text-white text-xs font-bold tracking-wide">{mosaic[1].label}</p>
+              </div>
+
+              {/* Bottom-left card */}
+              <div className="ch-float ch-float-3 absolute bottom-0 left-0 w-[110px] h-[115px] md:w-[128px] md:h-[132px] rounded-2xl overflow-hidden shadow-xl"
+                style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[2].src} alt={mosaic[2].label} className="w-full h-full object-cover"
+                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
+                <p className="absolute bottom-2 left-3 text-white text-xs font-bold tracking-wide">{mosaic[2].label}</p>
+              </div>
+
+              {/* Bottom-right card */}
+              <div className="ch-float ch-float-4 absolute bottom-1 right-1 w-[95px] h-[100px] md:w-[110px] md:h-[116px] rounded-2xl overflow-hidden shadow-xl"
+                style={{ boxShadow: "0 14px 40px rgba(0,0,0,0.45)", outline: "1px solid rgba(255,255,255,0.10)" }}>
+                <img src={mosaic[5].src} alt={mosaic[5].label} className="w-full h-full object-cover"
+                  onError={e => { e.target.style.background = "#1f2937"; e.target.src = ""; }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)" }} />
+                <p className="absolute bottom-2 left-2 text-white text-xs font-bold">{mosaic[5].label}</p>
+              </div>
+
+              {/* Floating badge: Premium Quality */}
+              <div className="absolute -top-4 left-8 px-4 py-2 rounded-full text-xs font-bold text-white shadow-xl"
+                style={{ background: slide.accent, boxShadow: `0 8px 24px ${slide.accent}55`, transition: "background 0.6s ease" }}>
+                ✨ Premium Quality
+              </div>
+
+              {/* Floating card: price */}
+              <div className="ch-float ch-float-2 absolute top-14 -left-10 px-4 py-3 rounded-2xl bg-white shadow-2xl text-left min-w-[110px]"
+                style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.20)" }}>
+                <div className="text-gray-400 text-xs font-medium mb-0.5">Starting from</div>
+                <div className="font-black text-xl" style={{ color: slide.accent, fontFamily: "'Bebas Neue', sans-serif", letterSpacing: "0.04em" }}>KSh 90</div>
+              </div>
+
+              {/* Floating card: delivery */}
+              <div className="ch-float ch-float-3 absolute bottom-20 -right-6 md:-right-8 px-4 py-3 rounded-2xl bg-white shadow-2xl"
+                style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.18)" }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🚚</span>
+                  <div>
+                    <div className="font-bold text-gray-800 text-xs leading-tight">Same Day</div>
+                    <div className="text-gray-400 text-xs">Nairobi delivery</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-end justify-between pb-8">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
+          {/* Bottom row: reviews + scroll */}
+          <div className="flex items-end justify-between pb-8 flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              {/* Stars */}
+              <div className="flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg key={i} className="ch-star w-4 h-4 fill-amber-400" style={{ animationDelay: `${0.6 + i * 0.08}s` }} viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
                 ))}
-                <span className="text-white/70 text-xs ml-1 font-medium">4.9 · 2,400+ reviews</span>
+              </div>
+              <div>
+                <span className="text-white font-bold text-sm">4.9</span>
+                <span className="text-white/50 text-xs ml-1">· 2,400+ reviews</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 pl-4 ml-2 border-l border-white/15">
+                <div className="flex -space-x-2">
+                  {["#10b981","#0ea5e9","#8b5cf6","#f59e0b"].map((c, i) => (
+                    <div key={i} className="w-7 h-7 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white"
+                      style={{ background: c }}>
+                      {["N","A","M","K"][i]}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-white/50 text-xs">Trusted across Kenya</span>
               </div>
             </div>
-            <button onClick={onShop} className="scroll-cue flex flex-col items-center gap-1 text-white/50 hover:text-white/90 transition-colors group">
+
+            {/* Scroll cue */}
+            <button onClick={onShop} className="ch-scroll flex items-center gap-2 text-white/40 hover:text-white/80 transition-colors group">
               <span className="text-xs font-medium tracking-widest uppercase">Explore</span>
-              <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-white/70 transition-colors">
+              <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/50 transition-colors">
                 <Icon.ArrowDown />
               </div>
             </button>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden" style={{ background: slide.accent, height: 36 }}>
-          <div className="flex animate-[ticker_20s_linear_infinite] whitespace-nowrap items-center h-full">
+        {/* ── TICKER STRIP ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden flex items-center"
+          style={{ height: 40, background: slide.accent, transition: "background 0.8s ease" }}>
+          <div className="ch-ticker flex whitespace-nowrap items-center h-full">
             {[...Array(4)].map((_, rep) => (
-              <span key={rep} className="inline-flex items-center gap-6 px-6 text-white text-xs font-bold tracking-wider">
-                {["🧴 DISH WASH", "🧼 HANDWASH", "🦠 DISINFECTANTS", "👕 LAUNDRY POWDER", "✨ GLASS CLEANER", "🚿 SHOWER GEL", "🌿 FABRIC SOFTENER", "🚗 CAR SHAMPOO"].map(t => (
-                  <span key={t} className="inline-flex items-center gap-4">{t} <span className="opacity-40">◆</span></span>
+              <span key={rep} className="inline-flex items-center gap-8 px-6 text-white text-xs font-bold tracking-widest uppercase">
+                {["🧴 Dish Wash","🧼 Handwash","🦠 Disinfectants","👕 Laundry Powder","✨ Glass Cleaner","🚿 Shower Gel","🌿 Fabric Softener","🚗 Car Shampoo"].map(t => (
+                  <span key={t} className="inline-flex items-center gap-5">{t}<span className="opacity-30">◆</span></span>
                 ))}
               </span>
             ))}
@@ -515,6 +693,175 @@ const FeaturedSection = ({ onAdd, addedIds, dark }) => {
         </div>
       </div>
     </section>
+  );
+};
+
+// ─── REDESIGNED WHY CHOOSE CLEANHUT ──────────────────────────────────────────
+const WhyChooseSection = ({ dark }) => {
+  const pillars = [
+    {
+      icon: <Icon.Award />,
+      accent: "#10b981",
+      label: "Premium Quality",
+      headline: "Certified & Tested",
+      body: "Every product undergoes rigorous quality testing. You get professional-grade formulations, every single order.",
+      stat: "50+", statLabel: "Products",
+    },
+    {
+      icon: <Icon.Truck />,
+      accent: "#0ea5e9",
+      label: "Fast Delivery",
+      headline: "Same-Day Nairobi",
+      body: "Order before noon, receive before evening. We deliver across Nairobi and ship nationwide within 24 hours.",
+      stat: "24h", statLabel: "Delivery",
+    },
+    {
+      icon: <Icon.Tag />,
+      accent: "#f59e0b",
+      label: "Best Prices",
+      headline: "Wholesale for All",
+      body: "Skip the middlemen. Whether you're a home buyer or a business, you get factory-direct pricing on every order.",
+      stat: "KSh 90", statLabel: "Starting from",
+    },
+    {
+      icon: <Icon.Chat />,
+      accent: "#8b5cf6",
+      label: "24/7 Support",
+      headline: "Always on WhatsApp",
+      body: "Got a question? Drop us a WhatsApp any time of day. A real person responds fast — no bots, no waiting.",
+      stat: "< 5min", statLabel: "Response time",
+    },
+  ];
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        .wc-card { transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease; }
+        .wc-card:hover { transform: translateY(-6px); }
+        .wc-icon-ring { transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        .wc-card:hover .wc-icon-ring { transform: scale(1.12) rotate(-6deg); }
+        @keyframes wc-reveal { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+        .wc-reveal { opacity: 0; animation: wc-reveal 0.7s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .wc-bar { animation: wc-bar 1.3s cubic-bezier(0.22,1,0.36,1) 0.4s forwards; transform-origin: left; transform: scaleX(0); }
+        @keyframes wc-bar { to { transform: scaleX(1); } }
+        .wc-numeral { font-family: 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.04em; }
+        .wc-header-line { height: 3px; border-radius: 2px; }
+      `}</style>
+
+      <section className={`relative py-20 md:py-28 overflow-hidden ${dark ? "bg-gray-950" : "bg-white"}`}>
+
+        {/* Subtle BG pattern */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
+          style={{ backgroundImage: "radial-gradient(circle, #10b981 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+
+        {/* Emerald glow blob (decorative) */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #10b98118 0%, transparent 70%)" }} />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #0ea5e914 0%, transparent 70%)" }} />
+
+        <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+
+          {/* ── Section header ── */}
+          <div className="mb-14 md:mb-18">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="wc-header-line w-8 bg-emerald-500" />
+              <span className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-emerald-400" : "text-emerald-600"}`}>
+                Why CleanHut
+              </span>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+              <div>
+                <h2 className={`text-4xl md:text-5xl font-black leading-tight mb-3 ${dark ? "text-white" : "text-gray-950"}`}
+                  style={{ fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: "0.01em" }}>
+                  Trusted By Thousands<br />
+                  <span className="text-emerald-500">Across Kenya.</span>
+                </h2>
+                <p className={`text-base max-w-lg leading-relaxed ${dark ? "text-gray-400" : "text-gray-500"}`}>
+                  From homes in Westlands to factories in Industrial Area — CleanHut is the cleaning partner Kenya relies on every day.
+                </p>
+              </div>
+              {/* CTA */}
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"
+                className="flex-shrink-0 self-start md:self-auto flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-emerald-200">
+                <Icon.WhatsApp /> Order on WhatsApp
+              </a>
+            </div>
+          </div>
+
+          {/* ── 4 pillar cards ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {pillars.map((p, i) => (
+              <div key={p.label}
+                className={`wc-card wc-reveal relative rounded-3xl p-6 flex flex-col gap-5 overflow-hidden ${dark ? "bg-gray-900 border border-gray-800" : "bg-gray-50 border border-gray-100"}`}
+                style={{ animationDelay: `${0.1 + i * 0.1}s`, boxShadow: dark ? "none" : "0 2px 20px rgba(0,0,0,0.05)" }}>
+
+                {/* Corner accent glow */}
+                <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${p.accent}22 0%, transparent 70%)` }} />
+
+                {/* Icon ring */}
+                <div className="wc-icon-ring w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${p.accent}18`, color: p.accent, border: `1.5px solid ${p.accent}30` }}>
+                  {p.icon}
+                </div>
+
+                {/* Label badge */}
+                <div className="flex items-center gap-2">
+                  <div className="wc-bar h-[2px] w-6 rounded-full flex-shrink-0" style={{ background: p.accent }} />
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: p.accent }}>{p.label}</span>
+                </div>
+
+                {/* Text */}
+                <div className="flex-1">
+                  <h3 className={`font-extrabold text-lg mb-2 leading-snug ${dark ? "text-white" : "text-gray-900"}`}>{p.headline}</h3>
+                  <p className={`text-sm leading-relaxed ${dark ? "text-gray-400" : "text-gray-500"}`}>{p.body}</p>
+                </div>
+
+                {/* Stat */}
+                <div className={`pt-4 mt-auto border-t ${dark ? "border-gray-800" : "border-gray-100"}`}>
+                  <div className="wc-numeral leading-none mb-0.5" style={{ fontSize: 28, color: p.accent }}>{p.stat}</div>
+                  <div className={`text-xs font-medium uppercase tracking-wide ${dark ? "text-gray-500" : "text-gray-400"}`}>{p.statLabel}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Social proof band ── */}
+          <div className={`mt-12 rounded-3xl px-7 py-5 flex flex-col sm:flex-row items-center justify-between gap-5 ${dark ? "bg-gray-900 border border-gray-800" : "bg-emerald-50 border border-emerald-100"}`}>
+            <div className="flex items-center gap-4">
+              {/* Avatar stack */}
+              <div className="flex -space-x-3">
+                {["#10b981","#0ea5e9","#f59e0b","#8b5cf6","#ef4444"].map((c, i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-extrabold text-white"
+                    style={{ background: c, borderColor: dark ? "#030712" : "#f0fdf4" }}>
+                    {["N","A","W","M","J"][i]}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className={`font-bold text-sm ${dark ? "text-white" : "text-gray-900"}`}>10,000+ happy customers</p>
+                <p className={`text-xs ${dark ? "text-gray-400" : "text-gray-500"}`}>Homes, offices & businesses across Kenya</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <div className="flex flex-col items-center">
+                <div className="flex gap-0.5 mb-1">
+                  {[...Array(5)].map((_,i) => <svg key={i} className="w-4 h-4 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}
+                </div>
+                <span className={`text-xs font-semibold ${dark ? "text-gray-300" : "text-gray-600"}`}>4.9 average rating</span>
+              </div>
+              <div className={`w-px h-10 ${dark ? "bg-gray-700" : "bg-emerald-200"}`} />
+              <div className="text-center">
+                <div className="wc-numeral text-2xl font-black text-emerald-500">2,400+</div>
+                <div className={`text-xs font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>Reviews</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
@@ -645,26 +992,8 @@ export default function App() {
         )}
       </section>
 
-      <section className={`py-16 ${dark ? "bg-gray-800" : "bg-emerald-600"}`}>
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-2">Why Choose CleanHut?</h2>
-          <p className="text-emerald-100 mb-12">Trusted by thousands of Kenyan homes and businesses</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: "🏆", title: "Premium Quality", desc: "Tested and certified cleaning products" },
-              { icon: "🚚", title: "Fast Delivery", desc: "Same-day delivery within Nairobi" },
-              { icon: "💰", title: "Best Prices", desc: "Wholesale prices for everyone" },
-              { icon: "💬", title: "24/7 Support", desc: "WhatsApp us anytime, we respond fast" },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className={`p-6 rounded-2xl ${dark ? "bg-gray-700" : "bg-white/15 backdrop-blur-sm border border-white/20"}`}>
-                <div className="text-4xl mb-3">{icon}</div>
-                <h3 className="text-white font-bold mb-1">{title}</h3>
-                <p className="text-emerald-100 text-sm">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* REDESIGNED WHY CHOOSE SECTION */}
+      <WhyChooseSection dark={dark} />
 
       <footer className={`py-12 ${dark ? "bg-gray-900 border-t border-gray-800" : "bg-gray-900"}`}>
         <div className="max-w-7xl mx-auto px-4">
