@@ -1,644 +1,727 @@
 import { useState, useRef } from "react";
 
+/* ═══════════════ DATA ═══════════════ */
 const PACKAGES = [
-  { id: "welfare", icon: "🤝", name: "Welfare", desc: "For persons over 18yrs — compulsory for all adult members", fee: "KES 1,000", color: "#16a34a", bg: "#f0fdf4", border: "#86efac" },
-  { id: "soft_loan", icon: "💵", name: "Soft Loans", desc: "Affordable loans with flexible repayment terms", fee: "", color: "#0369a1", bg: "#f0f9ff", border: "#7dd3fc" },
-  { id: "emergency_loan", icon: "🚨", name: "Emergency Loans", desc: "Quick disbursement for urgent financial needs", fee: "", color: "#b45309", bg: "#fffbeb", border: "#fcd34d" },
-  { id: "school_fees", icon: "🎓", name: "School Fees Loans", desc: "Education financing for all levels", fee: "", color: "#7c3aed", bg: "#faf5ff", border: "#c4b5fd" },
-  { id: "hospital", icon: "🏥", name: "Hospital Insurance", desc: "Medical cover for you and your family", fee: "", color: "#db2777", bg: "#fdf2f8", border: "#f9a8d4" },
-  { id: "group", icon: "👥", name: "Group Projects", desc: "Collaborative community investment initiatives", fee: "", color: "#0f766e", bg: "#f0fdfa", border: "#5eead4" },
-  { id: "initiation", icon: "🌱", name: "Initiation", desc: "New member onboarding and orientation", fee: "", color: "#c2410c", bg: "#fff7ed", border: "#fdba74" },
-  { id: "water", icon: "💧", name: "Water Drilling", desc: "Borehole and water access projects", fee: "", color: "#0284c7", bg: "#f0f9ff", border: "#38bdf8" },
-  { id: "farming", icon: "🌾", name: "Fertilizers & Seeds", desc: "Agricultural inputs and farming support", fee: "", color: "#65a30d", bg: "#f7fee7", border: "#bef264" },
-  { id: "title_loan", icon: "🏠", name: "Title & Logbook Loans", desc: "Secured loans against property or vehicle", fee: "", color: "#6d28d9", bg: "#f5f3ff", border: "#a78bfa" },
+  { id:"welfare",   icon:"🤝", name:"Welfare",             desc:"Compulsory for all adults 18+",      must:true,  color:"#15803d", light:"#f0fdf4", border:"#86efac" },
+  { id:"soft",      icon:"💵", name:"Soft Loans",          desc:"Affordable, flexible repayment",                color:"#1d4ed8", light:"#eff6ff", border:"#93c5fd" },
+  { id:"emergency", icon:"🚨", name:"Emergency Loans",     desc:"Instant disbursement when urgent",              color:"#b45309", light:"#fffbeb", border:"#fcd34d" },
+  { id:"school",    icon:"🎓", name:"School Fees Loans",   desc:"Education financing, all levels",               color:"#7c3aed", light:"#f5f3ff", border:"#c4b5fd" },
+  { id:"hospital",  icon:"🏥", name:"Hospital Insurance",  desc:"Medical cover for your family",                 color:"#be185d", light:"#fdf2f8", border:"#f9a8d4" },
+  { id:"group",     icon:"👥", name:"Group Projects",      desc:"Community investment initiatives",              color:"#0f766e", light:"#f0fdfa", border:"#5eead4" },
+  { id:"initiation",icon:"🌱", name:"Initiation",          desc:"New member onboarding",                         color:"#c2410c", light:"#fff7ed", border:"#fdba74" },
+  { id:"water",     icon:"💧", name:"Water Drilling",      desc:"Borehole & water access projects",              color:"#0284c7", light:"#f0f9ff", border:"#38bdf8" },
+  { id:"farming",   icon:"🌾", name:"Fertilizers & Seeds", desc:"Agricultural inputs & support",                 color:"#65a30d", light:"#f7fee7", border:"#bef264" },
+  { id:"title",     icon:"🏠", name:"Title & Logbook Loans",desc:"Secured loans on property/vehicle",            color:"#6d28d9", light:"#faf5ff", border:"#a78bfa" },
 ];
 
-const FEES = [
-  { label: "Registration", amount: "500", icon: "📋" },
-  { label: "File", amount: "200", icon: "🗂️" },
-  { label: "Welfare (18yrs+)", amount: "1,000", icon: "🤝" },
-];
+const LOAN_TYPES = ["Soft Loan","Emergency Loan","School Fees Loan","Title Loan","Logbook Loan"];
+const REPAYMENTS = ["1 Month","3 Months","6 Months","12 Months","18 Months","24 Months","36 Months"];
+const REG_STEPS  = ["Personal","Packages","Documents","Review"];
+const LOAN_STEPS = ["Details","Loan Info","Documents","Review"];
 
-const LOAN_TYPES = ["Soft Loan", "Emergency Loan", "School Fees Loan", "Title Loan", "Logbook Loan"];
-const REPAYMENT = ["1 Month", "3 Months", "6 Months", "12 Months", "18 Months", "24 Months", "36 Months"];
+/* ═══════════════ GLOBAL CSS ═══════════════ */
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f1f5f9; }
+  input, select, textarea {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    width: 100%;
+    outline: none;
+    box-sizing: border-box;
+    transition: border .2s, box-shadow .2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #15803d !important;
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.12) !important;
+    background: #fff !important;
+  }
+  input::placeholder, textarea::placeholder { color: #cbd5e1; }
+  select option { background: #fff; color: #0f172a; }
+  textarea { resize: vertical; font-family: 'Outfit', sans-serif; }
+  button:active { opacity: .85; transform: scale(.98); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fu { animation: fadeUp .3s ease both; }
+`;
 
-export default function App() {
-  const [screen, setScreen] = useState("home"); // home | register | loan
-  const [step, setStep] = useState(0);
-  const [done, setDone] = useState(false);
+/* ═══════════════ STYLE TOKENS ═══════════════ */
+const T = {
+  app:       { fontFamily:"'Outfit',sans-serif", minHeight:"100vh", background:"#f1f5f9", maxWidth:480, margin:"0 auto" },
+  hero:      { background:"linear-gradient(150deg,#0f4c27 0%,#166534 55%,#14532d 100%)", padding:"44px 24px 52px", position:"relative", overflow:"hidden", textAlign:"center" },
+  heroBadge: { display:"inline-block", background:"rgba(255,255,255,0.13)", color:"rgba(255,255,255,0.7)", fontSize:9, fontWeight:700, letterSpacing:".14em", padding:"4px 16px", borderRadius:20, marginBottom:16, textTransform:"uppercase" },
+  heroIcon:  { fontSize:56, marginBottom:14 },
+  heroTitle: { fontSize:36, fontWeight:800, color:"#fff", lineHeight:1.1, letterSpacing:"-1px", marginBottom:10, fontFamily:"'Playfair Display',serif" },
+  heroSub:   { fontSize:13, color:"rgba(255,255,255,0.62)", lineHeight:1.9 },
+  main:      { padding:"20px 16px 40px" },
 
-  // Registration form
-  const [reg, setReg] = useState({
-    firstName: "", lastName: "", dob: "", phone: "", email: "",
-    idType: "national_id", idNumber: "",
-    packages: ["welfare"],
-    selfie: null, selfiePreview: null,
-    idFront: null, idFrontPreview: null,
-    idBack: null, idBackPreview: null,
-  });
+  card:      { background:"#fff", borderRadius:20, padding:20, boxShadow:"0 2px 18px rgba(0,0,0,0.06)", marginBottom:18, border:"1px solid #f1f5f9" },
+  cardTitle: { fontSize:20, fontWeight:800, color:"#0f172a", marginBottom:4, fontFamily:"'Playfair Display',serif" },
+  cardSub:   { fontSize:13, color:"#64748b", marginBottom:18 },
 
-  // Loan form
-  const [loan, setLoan] = useState({
-    firstName: "", lastName: "", phone: "", idNumber: "",
-    loanType: "", loanAmount: "", purpose: "", repayment: "",
-    selfie: null, selfiePreview: null,
-    idFront: null, idFrontPreview: null,
-    idBack: null, idBackPreview: null,
-  });
+  secHead:   { fontSize:11, fontWeight:800, color:"#475569", textTransform:"uppercase", letterSpacing:".08em", marginBottom:12 },
 
-  const selfieRef = useRef();
-  const idFrontRef = useRef();
-  const idBackRef = useRef();
+  feeRow:    { display:"flex", gap:10, flexWrap:"wrap", marginBottom:14 },
+  feeChip:   { display:"flex", alignItems:"center", gap:10, background:"#f8faff", border:"1px solid #e8edf5", borderRadius:14, padding:"10px 14px", flex:1, minWidth:90 },
+  feeAmt:    { fontSize:16, fontWeight:900, color:"#0f4c27", fontFamily:"'Playfair Display',serif" },
+  feeLbl:    { fontSize:9, color:"#94a3b8", fontWeight:700, textTransform:"uppercase", letterSpacing:".05em" },
 
-  const upReg = (f, v) => setReg(p => ({ ...p, [f]: v }));
-  const upLoan = (f, v) => setLoan(p => ({ ...p, [f]: v }));
+  noteBox:   { background:"#fefce8", border:"1.5px solid #fde047", borderRadius:12, padding:"10px 14px", fontSize:12, color:"#713f12", lineHeight:1.6 },
+  reqItem:   { display:"flex", gap:8, alignItems:"flex-start", marginBottom:7 },
+  reqDot:    { color:"#15803d", fontWeight:900, fontSize:13, flexShrink:0, marginTop:1 },
 
-  const togglePkg = (id) => {
-    if (id === "welfare") return;
-    setReg(p => ({
-      ...p,
-      packages: p.packages.includes(id)
-        ? p.packages.filter(x => x !== id)
-        : [...p.packages, id],
-    }));
-  };
+  pkgGrid:   { display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:20 },
+  pkgTile:   { borderRadius:16, padding:"14px 12px", border:"1.5px solid", textAlign:"center" },
+  pkgIcon:   { fontSize:28, marginBottom:6 },
+  pkgName:   { fontSize:12, fontWeight:800, marginBottom:3 },
+  pkgDesc:   { fontSize:10, color:"#64748b", lineHeight:1.4 },
+  mustBadge: { marginTop:6, display:"inline-block", background:"#fef3c7", color:"#92400e", fontSize:9, fontWeight:800, padding:"2px 8px", borderRadius:20, letterSpacing:".06em" },
 
-  const handlePhoto = (field, previewField, file, setter) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => setter(p => ({ ...p, [field]: file, [previewField]: e.target.result }));
-    reader.readAsDataURL(file);
-  };
+  btnGreen:  { width:"100%", background:"linear-gradient(135deg,#15803d,#166534)", color:"#fff", border:"none", borderRadius:16, padding:"17px 20px", fontSize:16, fontWeight:800, fontFamily:"'Outfit',sans-serif", cursor:"pointer", boxShadow:"0 6px 20px rgba(21,128,61,0.3)", display:"flex", alignItems:"center", justifyContent:"center", gap:10 },
+  btnOutline:{ width:"100%", background:"#fff", color:"#15803d", border:"2.5px solid #15803d", borderRadius:16, padding:"15px 20px", fontSize:16, fontWeight:800, fontFamily:"'Outfit',sans-serif", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:10 },
 
-  const regSteps = ["Personal Info", "Packages", "Documents", "Review"];
-  const loanSteps = ["Your Details", "Loan Info", "Documents", "Review"];
+  footer:    { textAlign:"center", fontSize:10, color:"#cbd5e1", marginTop:28, paddingTop:16, borderTop:"1px solid #f1f5f9" },
 
-  const canRegStep0 = reg.firstName && reg.lastName && reg.dob && reg.phone && reg.idNumber;
-  const canRegStep1 = reg.packages.length > 0;
-  const canRegStep2 = reg.selfiePreview && reg.idFrontPreview && reg.idBackPreview;
-  const canLoanStep0 = loan.firstName && loan.lastName && loan.phone && loan.idNumber;
-  const canLoanStep1 = loan.loanType && loan.loanAmount && loan.purpose && loan.repayment;
-  const canLoanStep2 = loan.selfiePreview && loan.idFrontPreview && loan.idBackPreview;
+  formHdr:   { background:"#fff", borderBottom:"1px solid #f1f5f9", padding:"13px 16px", display:"flex", alignItems:"center", gap:12, position:"sticky", top:0, zIndex:100, boxShadow:"0 1px 10px rgba(0,0,0,0.05)" },
+  backBtn:   { background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:12, width:38, height:38, fontSize:20, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#334155", fontFamily:"inherit", lineHeight:1 },
 
-  const totalFees = () => {
-    let total = 500 + 200;
-    if (reg.packages.includes("welfare")) total += 1000;
-    return total.toLocaleString();
-  };
+  stepWrap:  { background:"#fff", borderBottom:"1px solid #f1f5f9", padding:"14px 20px", display:"flex", alignItems:"center" },
 
-  const PhotoUpload = ({ label, preview, inputRef, onCapture, icon }) => (
-    <div style={{ flex: 1 }}>
-      <div style={styles.photoLabel}>{label}</div>
-      <div
-        style={{
-          ...styles.photoBox,
-          background: preview ? "transparent" : "#f8faff",
-          border: preview ? "2px solid #16a34a" : "2px dashed #cbd5e1",
-          position: "relative",
-          overflow: "hidden",
-        }}
-        onClick={() => inputRef.current?.click()}
-      >
-        {preview ? (
-          <img src={preview} alt={label} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }} />
-        ) : (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 28, marginBottom: 6 }}>{icon}</div>
-            <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600 }}>Tap to upload</div>
-          </div>
-        )}
-        {preview && (
-          <div style={{ position: "absolute", top: 6, right: 6, background: "#16a34a", borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "white" }}>✓</div>
-        )}
-      </div>
-      <input ref={inputRef} type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={e => onCapture(e.target.files[0])} />
-    </div>
-  );
+  label:     { display:"block", fontSize:11, fontWeight:800, color:"#374151", marginBottom:5, textTransform:"uppercase", letterSpacing:".05em" },
+  row2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 },
 
-  const StepBar = ({ steps, current }) => (
-    <div style={styles.stepBar}>
+  pill:      { flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"11px 8px", border:"1.5px solid #e2e8f0", borderRadius:12, cursor:"pointer", fontSize:12, fontWeight:700, color:"#475569", background:"#f8fafc", transition:"all .18s" },
+  pillOn:    { borderColor:"#15803d", background:"#f0fdf4", color:"#15803d" },
+
+  listRow:   { display:"flex", alignItems:"center", gap:12, padding:"13px 14px", border:"2px solid #f1f5f9", borderRadius:14, background:"#fff", cursor:"pointer", transition:"all .15s", marginBottom:8 },
+
+  photoSec:  { background:"#f8faff", border:"1px solid #e8edf5", borderRadius:16, padding:14, marginBottom:14 },
+  photoHd:   { fontSize:11, fontWeight:800, color:"#334155", textTransform:"uppercase", letterSpacing:".07em", marginBottom:10 },
+  photoBox:  { height:112, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", overflow:"hidden", position:"relative", transition:"all .2s" },
+  photoLbl:  { fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:".05em", marginBottom:5 },
+
+  revBlock:  { background:"#fff", border:"1.5px solid #f1f5f9", borderRadius:16, padding:16, marginBottom:12 },
+  revHead:   { fontSize:11, fontWeight:800, color:"#15803d", textTransform:"uppercase", letterSpacing:".07em", marginBottom:12 },
+  revRow:    { display:"flex", gap:10, marginBottom:8, alignItems:"flex-start" },
+  revLbl:    { fontSize:11, color:"#94a3b8", minWidth:90, flexShrink:0, textTransform:"uppercase", letterSpacing:".04em" },
+  revVal:    { fontSize:13, color:"#0f172a", fontWeight:700, wordBreak:"break-word" },
+
+  totalBox:  { display:"flex", justifyContent:"space-between", alignItems:"center", background:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:14, padding:"14px 16px", marginBottom:16 },
+};
+
+/* ═══════════════ COMPONENTS — defined outside App to prevent remount ═══════════════ */
+
+function StepBar({ steps, current }) {
+  return (
+    <div style={T.stepWrap}>
       {steps.map((s, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", flex: 1 }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <div key={i} style={{ display:"flex", alignItems:"center", flex: i < steps.length - 1 ? 1 : "none" }}>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
             <div style={{
-              width: 28, height: 28, borderRadius: "50%",
-              background: i < current ? "#16a34a" : i === current ? "#1e3a5f" : "#e2e8f0",
-              color: i <= current ? "white" : "#94a3b8",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 11, fontWeight: 800, flexShrink: 0,
+              width:26, height:26, borderRadius:"50%", fontSize:11, fontWeight:800,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              background: i < current ? "#15803d" : i === current ? "#0f4c27" : "#f1f5f9",
+              color: i <= current ? "#fff" : "#94a3b8",
+              border: i === current ? "2.5px solid #15803d" : "2px solid transparent",
             }}>
               {i < current ? "✓" : i + 1}
             </div>
-            <span style={{ fontSize: 9, fontWeight: 700, color: i === current ? "#1e3a5f" : "#94a3b8", textAlign: "center", lineHeight: 1.2 }}>{s}</span>
+            <span style={{
+              fontSize:9, fontWeight:700, letterSpacing:".05em", textTransform:"uppercase", whiteSpace:"nowrap",
+              color: i === current ? "#15803d" : i < current ? "#15803d" : "#cbd5e1",
+            }}>{s}</span>
           </div>
-          {i < steps.length - 1 && <div style={{ flex: 1, height: 2, background: i < current ? "#16a34a" : "#e2e8f0", margin: "0 4px", marginBottom: 16 }} />}
+          {i < steps.length - 1 && (
+            <div style={{ flex:1, height:2, margin:"0 5px", marginBottom:16, borderRadius:2,
+              background: i < current ? "#15803d" : "#f1f5f9" }} />
+          )}
         </div>
       ))}
     </div>
   );
+}
 
-  const Field = ({ label, required, children }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={styles.label}>{label}{required && <span style={{ color: "#ef4444", marginLeft: 3 }}>*</span>}</label>
+function Fld({ label, required, children, mb }) {
+  return (
+    <div style={{ marginBottom: mb ?? 14 }}>
+      {label && (
+        <label style={T.label}>
+          {label}{required && <span style={{ color:"#ef4444", marginLeft:3 }}>*</span>}
+        </label>
+      )}
       {children}
     </div>
   );
+}
 
-  // ── HOME ──
+function PhotoBox({ label, preview, inputRef, onPick, icon }) {
+  return (
+    <div style={{ flex:1 }}>
+      <div style={T.photoLbl}>{label}</div>
+      <div
+        onClick={() => inputRef.current?.click()}
+        style={{
+          ...T.photoBox,
+          background: preview ? "transparent" : "#f8faff",
+          border: preview ? "2px solid #15803d" : "2px dashed #cbd5e1",
+        }}
+      >
+        {preview
+          ? <img src={preview} alt={label} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          : (
+            <div style={{ textAlign:"center" }}>
+              <div style={{ fontSize:28, marginBottom:5 }}>{icon}</div>
+              <div style={{ fontSize:10, color:"#94a3b8", fontWeight:700 }}>Tap to upload</div>
+            </div>
+          )
+        }
+        {preview && (
+          <div style={{ position:"absolute", top:6, right:6, background:"#15803d", borderRadius:"50%",
+            width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center",
+            fontSize:9, color:"#fff", fontWeight:900 }}>✓</div>
+        )}
+      </div>
+      <input ref={inputRef} type="file" accept="image/*" capture="environment"
+        style={{ display:"none" }} onChange={e => onPick(e.target.files[0])} />
+    </div>
+  );
+}
+
+function RevRow({ label, value }) {
+  if (!value) return null;
+  return (
+    <div style={T.revRow}>
+      <span style={T.revLbl}>{label}</span>
+      <span style={T.revVal}>{value}</span>
+    </div>
+  );
+}
+
+function FormHeader({ title, step, total, onBack }) {
+  return (
+    <div style={T.formHdr}>
+      <button style={T.backBtn} onClick={onBack}>‹</button>
+      <div>
+        <div style={{ fontSize:15, fontWeight:800, color:"#0f172a", fontFamily:"'Playfair Display',serif" }}>{title}</div>
+        <div style={{ fontSize:10, color:"#94a3b8", textTransform:"uppercase", letterSpacing:".06em" }}>Vagram Credit Limited</div>
+      </div>
+      <div style={{ marginLeft:"auto", fontSize:11, fontWeight:700, color:"#15803d",
+        background:"#f0fdf4", border:"1px solid #86efac", borderRadius:20, padding:"4px 12px" }}>
+        {step + 1} / {total}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════ APP ═══════════════ */
+export default function App() {
+  const [screen, setScreen] = useState("home");
+  const [step,   setStep  ] = useState(0);
+  const [done,   setDone  ] = useState(false);
+
+  /* — Registration flat state (no nested objects = stable refs) — */
+  const [rFirst,  setRFirst ] = useState("");
+  const [rLast,   setRLast  ] = useState("");
+  const [rDob,    setRDob   ] = useState("");
+  const [rPhone,  setRPhone ] = useState("");
+  const [rEmail,  setREmail ] = useState("");
+  const [rIdType, setRIdType] = useState("national_id");
+  const [rIdNum,  setRIdNum ] = useState("");
+  const [rPkgs,   setRPkgs  ] = useState(["welfare"]);
+  const [rSelP,   setRSelP  ] = useState(null);
+  const [rFrtP,   setRFrtP  ] = useState(null);
+  const [rBckP,   setRBckP  ] = useState(null);
+
+  /* — Loan flat state — */
+  const [lFirst,   setLFirst  ] = useState("");
+  const [lLast,    setLLast   ] = useState("");
+  const [lPhone,   setLPhone  ] = useState("");
+  const [lIdNum,   setLIdNum  ] = useState("");
+  const [lType,    setLType   ] = useState("");
+  const [lAmount,  setLAmount ] = useState("");
+  const [lPurpose, setLPurpose] = useState("");
+  const [lRepay,   setLRepay  ] = useState("");
+  const [lSelP,    setLSelP   ] = useState(null);
+  const [lFrtP,    setLFrtP   ] = useState(null);
+  const [lBckP,    setLBckP   ] = useState(null);
+
+  /* — Refs — */
+  const rSelRef = useRef(); const rFrtRef = useRef(); const rBckRef = useRef();
+  const lSelRef = useRef(); const lFrtRef = useRef(); const lBckRef = useRef();
+
+  const loadPhoto = (file, setter) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => setter(e.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const togglePkg = id => {
+    if (id === "welfare") return;
+    setRPkgs(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  };
+
+  const totalFees = () => (700 + (rPkgs.includes("welfare") ? 1000 : 0)).toLocaleString();
+
+  const canR0 = rFirst && rLast && rDob && rPhone && rIdNum;
+  const canR2 = rSelP && rFrtP && rBckP;
+  const canL0 = lFirst && lLast && lPhone && lIdNum;
+  const canL1 = lType && lAmount && lPurpose && lRepay;
+  const canL2 = lSelP && lFrtP && lBckP;
+
+  const goHome = () => { setScreen("home"); setStep(0); setDone(false); };
+
+  /* ══ HOME ══ */
   if (screen === "home") return (
-    <div style={styles.app}>
-      <style>{cssGlobal}</style>
+    <div style={T.app}>
+      <style>{CSS}</style>
 
-      {/* Hero Banner */}
-      <div style={styles.hero}>
-        <div style={styles.heroBadge}>EST. VAGRAM COMPANY</div>
-        <div style={styles.heroLogo}>🏦</div>
-        <h1 style={styles.heroTitle}>VAGRAM<br />CREDIT LIMITED</h1>
-        <p style={styles.heroSub}>Welfare · Loans · Insurance · Farming<br />Building Communities Together</p>
+      <div style={T.hero}>
+        {/* Decorative blobs */}
+        <div style={{ position:"absolute", top:-60, right:-60, width:200, height:200, borderRadius:"50%",
+          background:"radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", bottom:-40, left:-50, width:160, height:160, borderRadius:"50%",
+          background:"radial-gradient(circle,rgba(255,255,255,.05),transparent 70%)", pointerEvents:"none" }} />
+
+        <div style={T.heroBadge}>✦ VAGRAM COMPANY ✦</div>
+        <div style={T.heroIcon}>🏦</div>
+        <h1 style={T.heroTitle}>VAGRAM CREDIT<br />LIMITED</h1>
+        <p style={T.heroSub}>Welfare · Loans · Insurance<br />Farming · Group Projects</p>
       </div>
 
-      <div style={styles.main}>
+      <div style={T.main}>
 
-        {/* Fees Info */}
-        <div style={styles.feesCard}>
-          <div style={styles.sectionHead}>📋 Membership Fees</div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {FEES.map(f => (
-              <div key={f.label} style={styles.feeChip}>
-                <span style={{ fontSize: 16 }}>{f.icon}</span>
+        {/* Fees */}
+        <div className="fu" style={T.card}>
+          <div style={T.secHead}>📋 Membership Fees</div>
+          <div style={T.feeRow}>
+            {[["📋","Registration","500"],["🗂️","File","200"],["🤝","Welfare (18+)","1,000"]].map(([ic,lb,am]) => (
+              <div key={lb} style={T.feeChip}>
+                <span style={{ fontSize:20 }}>{ic}</span>
                 <div>
-                  <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600 }}>{f.label}</div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "#1e3a5f" }}>KES {f.amount}</div>
+                  <div style={T.feeLbl}>{lb}</div>
+                  <div style={T.feeAmt}>KES {am}</div>
                 </div>
               </div>
             ))}
           </div>
-          <div style={styles.noteBox}>⚠️ <strong>Welfare (KES 1,000)</strong> is compulsory for every member above 18 years</div>
-
-          <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", marginBottom: 8, textTransform: "uppercase" }}>Requirements</div>
-            {["Copy of National ID / Passport", "Birth Certificate (for children under 18 years)"].map(r => (
-              <div key={r} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 6 }}>
-                <span style={{ color: "#16a34a", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 13, color: "#374151" }}>{r}</span>
+          <div style={T.noteBox}>
+            ⚠️ <strong>Welfare (KES 1,000)</strong> is compulsory for every member above 18 years.
+          </div>
+          <div style={{ marginTop:16 }}>
+            <div style={T.secHead}>Requirements</div>
+            {["Copy of National ID or Passport","Birth Certificate — for children under 18"].map(r => (
+              <div key={r} style={T.reqItem}>
+                <span style={T.reqDot}>◆</span>
+                <span style={{ fontSize:13, color:"#374151", lineHeight:1.5 }}>{r}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Packages */}
-        <div style={styles.sectionHead}>📦 Packages Offered</div>
-        <div style={styles.pkgGrid}>
-          {PACKAGES.map((p, i) => (
-            <div key={p.id} style={{ ...styles.pkgCard, background: p.bg, borderColor: p.border }}>
-              <div style={{ fontSize: 24, marginBottom: 4 }}>{p.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: p.color, marginBottom: 2 }}>{i + 1}. {p.name}</div>
-              <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.4 }}>{p.desc}</div>
-              {p.fee && <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: p.color }}>{p.fee}</div>}
-            </div>
-          ))}
-        </div>
-
-        {/* CTA Buttons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-          <button style={styles.btnGreen} onClick={() => { setScreen("register"); setStep(0); setDone(false); }}>
-            🤝 Join as a Member
-          </button>
-          <button style={styles.btnBlue} onClick={() => { setScreen("loan"); setStep(0); setDone(false); }}>
-            💵 Apply for a Loan
-          </button>
-        </div>
-
-        <div style={styles.footer}>© 2026 Vagram Credit Limited · All Rights Reserved</div>
-      </div>
-    </div>
-  );
-
-  // ── SUCCESS ──
-  if (done) return (
-    <div style={styles.app}>
-      <style>{cssGlobal}</style>
-      <div style={{ ...styles.main, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", textAlign: "center" }}>
-        <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
-        <h2 style={{ fontSize: 24, fontWeight: 900, color: "#1e3a5f", marginBottom: 8 }}>
-          {screen === "register" ? "Registration Submitted!" : "Loan Application Submitted!"}
-        </h2>
-        <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, marginBottom: 24 }}>
-          Thank you, <strong>{screen === "register" ? reg.firstName : loan.firstName}</strong>!<br />
-          Your application has been received. Our team will review and contact you shortly.
-        </p>
-        <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 14, padding: 16, marginBottom: 24, width: "100%", maxWidth: 340 }}>
-          <div style={{ fontSize: 13, color: "#16a34a", fontWeight: 700 }}>
-            {screen === "register" ? `Total Fees: KES ${totalFees()}` : `Loan Request: KES ${Number(loan.loanAmount).toLocaleString()}`}
+        <div className="fu" style={{ animationDelay:".07s" }}>
+          <div style={T.secHead}>📦 Packages Offered</div>
+          <div style={T.pkgGrid}>
+            {PACKAGES.map((p, i) => (
+              <div key={p.id} className="fu" style={{
+                ...T.pkgTile, background:p.light, borderColor:p.border,
+                animationDelay:`${i * .04}s`,
+              }}>
+                <div style={T.pkgIcon}>{p.icon}</div>
+                <div style={{ ...T.pkgName, color:p.color }}>{p.name}</div>
+                <div style={T.pkgDesc}>{p.desc}</div>
+                {p.must && <div style={T.mustBadge}>MUST</div>}
+              </div>
+            ))}
           </div>
         </div>
-        <button style={styles.btnGreen} onClick={() => { setScreen("home"); setDone(false); }}>← Back to Home</button>
+
+        {/* CTAs */}
+        <div className="fu" style={{ display:"flex", flexDirection:"column", gap:12, animationDelay:".12s" }}>
+          <button style={T.btnGreen} onClick={() => { setScreen("register"); setStep(0); setDone(false); }}>
+            <span>🤝</span><span>Join as a Member</span>
+          </button>
+          <button style={T.btnOutline} onClick={() => { setScreen("loan"); setStep(0); setDone(false); }}>
+            <span>💵</span><span>Apply for a Loan</span>
+          </button>
+        </div>
+
+        <div style={T.footer}>© 2026 Vagram Credit Limited · All Rights Reserved</div>
       </div>
     </div>
   );
 
-  // ── REGISTER FLOW ──
-  if (screen === "register") return (
-    <div style={styles.app}>
-      <style>{cssGlobal}</style>
-      <div style={styles.formHeader}>
-        <button style={styles.backBtn} onClick={() => step === 0 ? setScreen("home") : setStep(s => s - 1)}>←</button>
-        <div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#1e3a5f" }}>Member Registration</div>
-          <div style={{ fontSize: 11, color: "#94a3b8" }}>Vagram Credit Limited</div>
+  /* ══ SUCCESS ══ */
+  if (done) return (
+    <div style={T.app}>
+      <style>{CSS}</style>
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
+        justifyContent:"center", minHeight:"100vh", padding:"40px 20px", textAlign:"center" }}>
+        <div className="fu" style={{ fontSize:72, marginBottom:18 }}>✅</div>
+        <h2 className="fu" style={{ fontSize:24, fontWeight:800, fontFamily:"'Playfair Display',serif",
+          color:"#0f4c27", marginBottom:10, animationDelay:".07s" }}>
+          {screen === "register" ? "Registration Submitted!" : "Application Submitted!"}
+        </h2>
+        <p className="fu" style={{ fontSize:14, color:"#64748b", lineHeight:1.8,
+          marginBottom:24, animationDelay:".11s" }}>
+          Thank you, <strong style={{ color:"#0f172a" }}>{screen === "register" ? rFirst : lFirst}</strong>.<br />
+          Our team will review and contact you shortly.
+        </p>
+        <div className="fu" style={{ ...T.card, width:"100%", maxWidth:300, marginBottom:24,
+          textAlign:"center", animationDelay:".15s" }}>
+          <div style={{ fontSize:22, fontWeight:900, color:"#15803d", fontFamily:"'Playfair Display',serif" }}>
+            {screen === "register"
+              ? `Total Fees: KES ${totalFees()}`
+              : `Loan Request: KES ${Number(lAmount || 0).toLocaleString()}`}
+          </div>
         </div>
+        <button className="fu" style={{ ...T.btnGreen, maxWidth:300, animationDelay:".19s" }} onClick={goHome}>
+          ← Back to Home
+        </button>
       </div>
+    </div>
+  );
 
-      <StepBar steps={regSteps} current={step} />
+  /* ══ REGISTER ══ */
+  if (screen === "register") return (
+    <div style={T.app}>
+      <style>{CSS}</style>
+      <FormHeader title="Member Registration" step={step} total={REG_STEPS.length}
+        onBack={() => step === 0 ? goHome() : setStep(s => s - 1)} />
+      <StepBar steps={REG_STEPS} current={step} />
 
-      <div style={styles.main}>
+      <div style={T.main}>
 
-        {/* Step 0: Personal Info */}
         {step === 0 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Personal Information</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <Field label="First Name" required><input style={styles.input} placeholder="e.g. John" value={reg.firstName} onChange={e => upReg("firstName", e.target.value)} /></Field>
-              <Field label="Last Name" required><input style={styles.input} placeholder="e.g. Kamau" value={reg.lastName} onChange={e => upReg("lastName", e.target.value)} /></Field>
+          <div className="fu" style={T.card}>
+            <div style={T.cardTitle}>Personal Information</div>
+            <div style={T.cardSub}>Please fill in your details accurately</div>
+
+            <div style={T.row2}>
+              <Fld label="First Name" required>
+                <input placeholder="e.g. John" value={rFirst} onChange={e => setRFirst(e.target.value)} />
+              </Fld>
+              <Fld label="Last Name" required>
+                <input placeholder="e.g. Kamau" value={rLast} onChange={e => setRLast(e.target.value)} />
+              </Fld>
             </div>
-            <Field label="Date of Birth" required>
-              <input style={styles.input} type="date" value={reg.dob} onChange={e => upReg("dob", e.target.value)} />
-            </Field>
-            <Field label="Phone Number" required>
-              <input style={styles.input} type="tel" placeholder="+254 700 000 000" value={reg.phone} onChange={e => upReg("phone", e.target.value)} />
-            </Field>
-            <Field label="Email Address">
-              <input style={styles.input} type="email" placeholder="email@example.com" value={reg.email} onChange={e => upReg("email", e.target.value)} />
-            </Field>
-            <Field label="ID Type" required>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[["national_id", "National ID"], ["passport", "Passport"], ["birth_cert", "Birth Certificate"]].map(([v, l]) => (
-                  <label key={v} style={{ ...styles.radioPill, ...(reg.idType === v ? styles.radioPillActive : {}) }}>
-                    <input type="radio" name="idType" value={v} checked={reg.idType === v} onChange={e => upReg("idType", e.target.value)} style={{ display: "none" }} />
-                    <span style={{ fontSize: 11, fontWeight: 700 }}>{l}</span>
-                  </label>
+            <Fld label="Date of Birth" required>
+              <input type="date" value={rDob} onChange={e => setRDob(e.target.value)} />
+            </Fld>
+            <Fld label="Phone Number" required>
+              <input type="tel" placeholder="+254 700 000 000" value={rPhone} onChange={e => setRPhone(e.target.value)} />
+            </Fld>
+            <Fld label="Email Address">
+              <input type="email" placeholder="your@email.com" value={rEmail} onChange={e => setREmail(e.target.value)} />
+            </Fld>
+            <Fld label="ID Type" required>
+              <div style={{ display:"flex", gap:8 }}>
+                {[["national_id","National ID"],["passport","Passport"],["birth_cert","Birth Cert"]].map(([v,l]) => (
+                  <div key={v} onClick={() => setRIdType(v)}
+                    style={{ ...T.pill, ...(rIdType === v ? T.pillOn : {}) }}>
+                    {l}
+                  </div>
                 ))}
               </div>
-            </Field>
-            <Field label="ID / Passport / Certificate Number" required>
-              <input style={styles.input} placeholder="Enter document number" value={reg.idNumber} onChange={e => upReg("idNumber", e.target.value)} />
-            </Field>
-            <button style={{ ...styles.btnGreen, opacity: canRegStep0 ? 1 : 0.4 }} disabled={!canRegStep0} onClick={() => setStep(1)}>
-              Continue →
-            </button>
+            </Fld>
+            <Fld label="Document Number" required>
+              <input placeholder="ID / Passport number" value={rIdNum} onChange={e => setRIdNum(e.target.value)} />
+            </Fld>
+            <button style={{ ...T.btnGreen, opacity: canR0 ? 1 : 0.4 }}
+              disabled={!canR0} onClick={() => setStep(1)}>Continue →</button>
           </div>
         )}
 
-        {/* Step 1: Packages */}
         {step === 1 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Select Packages</div>
-            <div style={styles.noteBox}>🟢 Welfare is <strong>mandatory</strong> for members above 18 years (pre-selected)</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+          <div className="fu">
+            <div style={T.card}>
+              <div style={T.cardTitle}>Select Packages</div>
+              <div style={T.cardSub}>Welfare is mandatory for adults 18+</div>
+              <div style={T.noteBox}>🟢 Welfare is pre-selected and cannot be removed</div>
+            </div>
+            <div style={T.card}>
               {PACKAGES.map(p => {
-                const sel = reg.packages.includes(p.id);
-                const mandatory = p.id === "welfare";
+                const sel = rPkgs.includes(p.id);
                 return (
                   <div key={p.id} onClick={() => togglePkg(p.id)} style={{
-                    ...styles.pkgSelectCard,
-                    background: sel ? p.bg : "white",
-                    border: `2px solid ${sel ? p.color : "#e2e8f0"}`,
-                    cursor: mandatory ? "default" : "pointer",
-                    opacity: mandatory ? 0.9 : 1,
+                    ...T.listRow,
+                    background: sel ? p.light : "#fff",
+                    borderColor: sel ? p.color : "#f1f5f9",
+                    cursor: p.must ? "default" : "pointer",
                   }}>
-                    <span style={{ fontSize: 22 }}>{p.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: sel ? p.color : "#374151" }}>{p.name}</div>
-                      <div style={{ fontSize: 11, color: "#94a3b8" }}>{p.desc}</div>
+                    <span style={{ fontSize:22 }}>{p.icon}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, fontWeight:800, color: sel ? p.color : "#374151" }}>{p.name}</div>
+                      <div style={{ fontSize:11, color:"#94a3b8" }}>{p.desc}</div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {p.fee && <span style={{ fontSize: 11, fontWeight: 700, color: p.color }}>{p.fee}</span>}
-                      {mandatory && <span style={{ fontSize: 10, background: "#fef3c7", color: "#92400e", padding: "2px 6px", borderRadius: 20, fontWeight: 700 }}>MUST</span>}
-                      <div style={{
-                        width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                        background: sel ? p.color : "#f1f5f9",
-                        border: `2px solid ${sel ? p.color : "#cbd5e1"}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 10, color: "white",
-                      }}>{sel ? "✓" : ""}</div>
-                    </div>
+                    {p.must && <span style={T.mustBadge}>MUST</span>}
+                    <div style={{
+                      width:22, height:22, borderRadius:"50%", flexShrink:0,
+                      background: sel ? p.color : "#f1f5f9",
+                      border: `2px solid ${sel ? p.color : "#e2e8f0"}`,
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:10, color:"#fff", fontWeight:900,
+                    }}>{sel ? "✓" : ""}</div>
                   </div>
                 );
               })}
             </div>
-
-            <div style={{ ...styles.feeChip, marginTop: 16, justifyContent: "space-between", padding: "14px 16px" }}>
-              <span style={{ fontWeight: 700, color: "#1e3a5f" }}>Total Fees Payable</span>
-              <span style={{ fontSize: 20, fontWeight: 900, color: "#16a34a" }}>KES {totalFees()}</span>
+            <div style={T.totalBox}>
+              <span style={{ fontWeight:800, color:"#0f172a" }}>Total Fees Payable</span>
+              <span style={{ fontSize:22, fontWeight:900, color:"#15803d", fontFamily:"'Playfair Display',serif" }}>
+                KES {totalFees()}
+              </span>
             </div>
-
-            <button style={{ ...styles.btnGreen, marginTop: 14, opacity: canRegStep1 ? 1 : 0.4 }} disabled={!canRegStep1} onClick={() => setStep(2)}>
-              Continue →
-            </button>
+            <button style={T.btnGreen} onClick={() => setStep(2)}>Continue →</button>
           </div>
         )}
 
-        {/* Step 2: Documents */}
         {step === 2 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Upload Documents</div>
-            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>Please upload clear photos of the following. Tap each box to take a photo or choose from gallery.</p>
-
-            <div style={styles.docSection}>
-              <div style={styles.docSectionTitle}>📸 Selfie (Live Photo)</div>
-              <div style={{ display: "flex" }}>
-                <PhotoUpload
-                  label="Take a clear selfie"
-                  preview={reg.selfiePreview}
-                  inputRef={selfieRef}
-                  icon="🤳"
-                  onCapture={f => handlePhoto("selfie", "selfiePreview", f, setReg)}
-                />
+          <div className="fu" style={T.card}>
+            <div style={T.cardTitle}>Upload Documents</div>
+            <div style={T.cardSub}>Tap each box to capture or choose a photo</div>
+            <div style={T.photoSec}>
+              <div style={T.photoHd}>📸 Selfie</div>
+              <div style={{ display:"flex" }}>
+                <PhotoBox label="Live selfie photo" preview={rSelP}
+                  inputRef={rSelRef} icon="🤳" onPick={f => loadPhoto(f, setRSelP)} />
               </div>
             </div>
-
-            <div style={styles.docSection}>
-              <div style={styles.docSectionTitle}>🪪 ID / Passport / Certificate</div>
-              <div style={{ display: "flex", gap: 12 }}>
-                <PhotoUpload label="Front Side" preview={reg.idFrontPreview} inputRef={idFrontRef} icon="🪪" onCapture={f => handlePhoto("idFront", "idFrontPreview", f, setReg)} />
-                <PhotoUpload label="Back Side" preview={reg.idBackPreview} inputRef={idBackRef} icon="🔄" onCapture={f => handlePhoto("idBack", "idBackPreview", f, setReg)} />
+            <div style={T.photoSec}>
+              <div style={T.photoHd}>🪪 ID / Passport / Certificate</div>
+              <div style={{ display:"flex", gap:12 }}>
+                <PhotoBox label="Front Side" preview={rFrtP}
+                  inputRef={rFrtRef} icon="🪪" onPick={f => loadPhoto(f, setRFrtP)} />
+                <PhotoBox label="Back Side" preview={rBckP}
+                  inputRef={rBckRef} icon="🔄" onPick={f => loadPhoto(f, setRBckP)} />
               </div>
             </div>
-
-            <button style={{ ...styles.btnGreen, opacity: canRegStep2 ? 1 : 0.4 }} disabled={!canRegStep2} onClick={() => setStep(3)}>
-              Continue →
-            </button>
+            <button style={{ ...T.btnGreen, opacity: canR2 ? 1 : 0.4 }}
+              disabled={!canR2} onClick={() => setStep(3)}>Continue →</button>
           </div>
         )}
 
-        {/* Step 3: Review */}
         {step === 3 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Review & Submit</div>
+          <div className="fu">
+            <div style={{ ...T.cardTitle, marginBottom:4 }}>Review & Submit</div>
+            <p style={{ fontSize:13, color:"#64748b", marginBottom:16 }}>Confirm your details below</p>
 
-            <div style={styles.reviewBlock}>
-              <div style={styles.reviewHead}>👤 Personal Details</div>
-              {[
-                ["Full Name", `${reg.firstName} ${reg.lastName}`],
-                ["Date of Birth", reg.dob],
-                ["Phone", reg.phone],
-                ["Email", reg.email || "—"],
-                ["ID Type", reg.idType.replace("_", " ").toUpperCase()],
-                ["ID Number", reg.idNumber],
-              ].map(([l, v]) => (
-                <div key={l} style={styles.reviewRow}>
-                  <span style={styles.reviewLbl}>{l}</span>
-                  <span style={styles.reviewVal}>{v}</span>
-                </div>
-              ))}
+            <div style={T.revBlock}>
+              <div style={T.revHead}>👤 Personal Details</div>
+              <RevRow label="Full Name" value={`${rFirst} ${rLast}`} />
+              <RevRow label="DOB"       value={rDob} />
+              <RevRow label="Phone"     value={rPhone} />
+              <RevRow label="Email"     value={rEmail || "—"} />
+              <RevRow label="ID Type"   value={rIdType.replace("_"," ").toUpperCase()} />
+              <RevRow label="ID Number" value={rIdNum} />
             </div>
 
-            <div style={styles.reviewBlock}>
-              <div style={styles.reviewHead}>📦 Selected Packages</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {reg.packages.map(id => {
+            <div style={T.revBlock}>
+              <div style={T.revHead}>📦 Packages Selected</div>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                {rPkgs.map(id => {
                   const p = PACKAGES.find(x => x.id === id);
-                  return <span key={id} style={{ background: p.bg, border: `1px solid ${p.border}`, color: p.color, fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20 }}>{p.icon} {p.name}</span>;
+                  return (
+                    <span key={id} style={{ background:p.light, border:`1px solid ${p.border}`,
+                      color:p.color, fontSize:11, fontWeight:700, padding:"4px 12px", borderRadius:20 }}>
+                      {p.icon} {p.name}
+                    </span>
+                  );
                 })}
               </div>
             </div>
 
-            <div style={styles.reviewBlock}>
-              <div style={styles.reviewHead}>📷 Documents</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[["Selfie", reg.selfiePreview], ["ID Front", reg.idFrontPreview], ["ID Back", reg.idBackPreview]].map(([l, src]) => (
-                  <div key={l} style={{ flex: 1, textAlign: "center" }}>
-                    <img src={src} alt={l} style={{ width: "100%", height: 70, objectFit: "cover", borderRadius: 10, border: "1.5px solid #e2e8f0" }} />
-                    <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 4 }}>{l}</div>
+            <div style={T.revBlock}>
+              <div style={T.revHead}>📷 Documents</div>
+              <div style={{ display:"flex", gap:10 }}>
+                {[["Selfie",rSelP],["ID Front",rFrtP],["ID Back",rBckP]].map(([l,src]) => (
+                  <div key={l} style={{ flex:1, textAlign:"center" }}>
+                    <img src={src} alt={l} style={{ width:"100%", height:72, objectFit:"cover",
+                      borderRadius:10, border:"1.5px solid #e2e8f0" }} />
+                    <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>{l}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ ...styles.feeChip, justifyContent: "space-between", padding: "14px 16px", marginBottom: 16 }}>
-              <span style={{ fontWeight: 700, color: "#1e3a5f" }}>Total Fees</span>
-              <span style={{ fontSize: 20, fontWeight: 900, color: "#16a34a" }}>KES {totalFees()}</span>
+            <div style={T.totalBox}>
+              <span style={{ fontWeight:800, color:"#0f172a" }}>Total Fees</span>
+              <span style={{ fontSize:22, fontWeight:900, color:"#15803d", fontFamily:"'Playfair Display',serif" }}>
+                KES {totalFees()}
+              </span>
             </div>
-
-            <button style={styles.btnGreen} onClick={() => setDone(true)}>
-              ✅ Submit Registration
-            </button>
+            <button style={T.btnGreen} onClick={() => setDone(true)}>✅ Submit Registration</button>
           </div>
         )}
       </div>
     </div>
   );
 
-  // ── LOAN FLOW ──
+  /* ══ LOAN ══ */
   if (screen === "loan") return (
-    <div style={styles.app}>
-      <style>{cssGlobal}</style>
-      <div style={styles.formHeader}>
-        <button style={styles.backBtn} onClick={() => step === 0 ? setScreen("home") : setStep(s => s - 1)}>←</button>
-        <div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#1e3a5f" }}>Loan Application</div>
-          <div style={{ fontSize: 11, color: "#94a3b8" }}>Vagram Credit Limited</div>
-        </div>
-      </div>
+    <div style={T.app}>
+      <style>{CSS}</style>
+      <FormHeader title="Loan Application" step={step} total={LOAN_STEPS.length}
+        onBack={() => step === 0 ? goHome() : setStep(s => s - 1)} />
+      <StepBar steps={LOAN_STEPS} current={step} />
 
-      <StepBar steps={loanSteps} current={step} />
+      <div style={T.main}>
 
-      <div style={styles.main}>
-
-        {/* Loan Step 0 */}
         {step === 0 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Applicant Details</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <Field label="First Name" required><input style={styles.input} placeholder="First name" value={loan.firstName} onChange={e => upLoan("firstName", e.target.value)} /></Field>
-              <Field label="Last Name" required><input style={styles.input} placeholder="Last name" value={loan.lastName} onChange={e => upLoan("lastName", e.target.value)} /></Field>
+          <div className="fu" style={T.card}>
+            <div style={T.cardTitle}>Applicant Details</div>
+            <div style={T.cardSub}>Your personal information</div>
+            <div style={T.row2}>
+              <Fld label="First Name" required>
+                <input placeholder="First name" value={lFirst} onChange={e => setLFirst(e.target.value)} />
+              </Fld>
+              <Fld label="Last Name" required>
+                <input placeholder="Last name" value={lLast} onChange={e => setLLast(e.target.value)} />
+              </Fld>
             </div>
-            <Field label="Phone Number" required>
-              <input style={styles.input} type="tel" placeholder="+254 700 000 000" value={loan.phone} onChange={e => upLoan("phone", e.target.value)} />
-            </Field>
-            <Field label="National ID / Passport No." required>
-              <input style={styles.input} placeholder="Enter document number" value={loan.idNumber} onChange={e => upLoan("idNumber", e.target.value)} />
-            </Field>
-            <button style={{ ...styles.btnBlue, opacity: canLoanStep0 ? 1 : 0.4 }} disabled={!canLoanStep0} onClick={() => setStep(1)}>
-              Continue →
-            </button>
+            <Fld label="Phone Number" required>
+              <input type="tel" placeholder="+254 700 000 000" value={lPhone} onChange={e => setLPhone(e.target.value)} />
+            </Fld>
+            <Fld label="National ID / Passport No." required>
+              <input placeholder="Document number" value={lIdNum} onChange={e => setLIdNum(e.target.value)} />
+            </Fld>
+            <button style={{ ...T.btnGreen, opacity: canL0 ? 1 : 0.4 }}
+              disabled={!canL0} onClick={() => setStep(1)}>Continue →</button>
           </div>
         )}
 
-        {/* Loan Step 1 */}
         {step === 1 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Loan Details</div>
-            <Field label="Loan Type" required>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="fu" style={T.card}>
+            <div style={T.cardTitle}>Loan Details</div>
+            <div style={T.cardSub}>Tell us about the loan you need</div>
+
+            <Fld label="Loan Type" required>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                 {LOAN_TYPES.map(t => (
-                  <label key={t} style={{ ...styles.pkgSelectCard, cursor: "pointer", padding: "12px 14px", ...(loan.loanType === t ? { background: "#eff6ff", border: "2px solid #1e3a5f" } : {}) }}>
-                    <input type="radio" name="loanType" value={t} checked={loan.loanType === t} onChange={e => upLoan("loanType", e.target.value)} style={{ accentColor: "#1e3a5f", width: 16, height: 16 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: loan.loanType === t ? "#1e3a5f" : "#374151" }}>{t}</span>
-                  </label>
+                  <div key={t} onClick={() => setLType(t)} style={{
+                    ...T.listRow, cursor:"pointer", padding:"12px 14px",
+                    background: lType === t ? "#f0fdf4" : "#fff",
+                    borderColor: lType === t ? "#15803d" : "#f1f5f9",
+                  }}>
+                    <div style={{ width:16, height:16, borderRadius:"50%", flexShrink:0,
+                      border: `2px solid ${lType===t?"#15803d":"#cbd5e1"}`,
+                      background: lType===t ? "#15803d":"transparent",
+                      display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      {lType===t && <div style={{ width:6, height:6, borderRadius:"50%", background:"#fff" }} />}
+                    </div>
+                    <span style={{ fontSize:13, fontWeight:700, color: lType===t ? "#15803d":"#374151" }}>{t}</span>
+                  </div>
                 ))}
               </div>
-            </Field>
+            </Fld>
 
-            <Field label="Loan Amount (KES)" required>
-              <input style={styles.input} type="number" placeholder="e.g. 50000" value={loan.loanAmount} onChange={e => upLoan("loanAmount", e.target.value)} />
-              {loan.loanAmount && (
-                <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 700, marginTop: 4 }}>
-                  KES {Number(loan.loanAmount).toLocaleString()}
+            <Fld label="Loan Amount (KES)" required>
+              <input type="number" placeholder="e.g. 50000" value={lAmount} onChange={e => setLAmount(e.target.value)} />
+              {lAmount && (
+                <div style={{ fontSize:12, color:"#15803d", fontWeight:700, marginTop:4 }}>
+                  KES {Number(lAmount).toLocaleString()}
                 </div>
               )}
-            </Field>
+            </Fld>
 
-            <Field label="Repayment Period" required>
-              <select style={styles.input} value={loan.repayment} onChange={e => upLoan("repayment", e.target.value)}>
+            <Fld label="Repayment Period" required>
+              <select value={lRepay} onChange={e => setLRepay(e.target.value)}>
                 <option value="">Select period</option>
-                {REPAYMENT.map(r => <option key={r}>{r}</option>)}
+                {REPAYMENTS.map(r => <option key={r}>{r}</option>)}
               </select>
-            </Field>
+            </Fld>
 
-            <Field label="Loan Purpose" required>
-              <textarea style={{ ...styles.input, resize: "vertical" }} rows={3} placeholder="How will you use this loan?" value={loan.purpose} onChange={e => upLoan("purpose", e.target.value)} />
-            </Field>
+            <Fld label="Loan Purpose" required>
+              <textarea rows={3} placeholder="How will you use this loan?" value={lPurpose} onChange={e => setLPurpose(e.target.value)} />
+            </Fld>
 
-            <button style={{ ...styles.btnBlue, opacity: canLoanStep1 ? 1 : 0.4 }} disabled={!canLoanStep1} onClick={() => setStep(2)}>
-              Continue →
-            </button>
+            <button style={{ ...T.btnGreen, opacity: canL1 ? 1 : 0.4 }}
+              disabled={!canL1} onClick={() => setStep(2)}>Continue →</button>
           </div>
         )}
 
-        {/* Loan Step 2: Documents */}
         {step === 2 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Upload Documents</div>
-            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>Upload clear photos of yourself and your ID/Passport.</p>
-
-            <div style={styles.docSection}>
-              <div style={styles.docSectionTitle}>📸 Selfie (Live Photo)</div>
-              <div style={{ display: "flex" }}>
-                <PhotoUpload label="Clear selfie photo" preview={loan.selfiePreview} inputRef={selfieRef} icon="🤳"
-                  onCapture={f => handlePhoto("selfie", "selfiePreview", f, setLoan)} />
+          <div className="fu" style={T.card}>
+            <div style={T.cardTitle}>Upload Documents</div>
+            <div style={T.cardSub}>Clear photos of yourself and your ID</div>
+            <div style={T.photoSec}>
+              <div style={T.photoHd}>📸 Selfie</div>
+              <div style={{ display:"flex" }}>
+                <PhotoBox label="Live selfie photo" preview={lSelP}
+                  inputRef={lSelRef} icon="🤳" onPick={f => loadPhoto(f, setLSelP)} />
               </div>
             </div>
-
-            <div style={styles.docSection}>
-              <div style={styles.docSectionTitle}>🪪 National ID / Passport</div>
-              <div style={{ display: "flex", gap: 12 }}>
-                <PhotoUpload label="Front Side" preview={loan.idFrontPreview} inputRef={idFrontRef} icon="🪪"
-                  onCapture={f => handlePhoto("idFront", "idFrontPreview", f, setLoan)} />
-                <PhotoUpload label="Back Side" preview={loan.idBackPreview} inputRef={idBackRef} icon="🔄"
-                  onCapture={f => handlePhoto("idBack", "idBackPreview", f, setLoan)} />
+            <div style={T.photoSec}>
+              <div style={T.photoHd}>🪪 National ID / Passport</div>
+              <div style={{ display:"flex", gap:12 }}>
+                <PhotoBox label="Front Side" preview={lFrtP}
+                  inputRef={lFrtRef} icon="🪪" onPick={f => loadPhoto(f, setLFrtP)} />
+                <PhotoBox label="Back Side" preview={lBckP}
+                  inputRef={lBckRef} icon="🔄" onPick={f => loadPhoto(f, setLBckP)} />
               </div>
             </div>
-
-            <button style={{ ...styles.btnBlue, opacity: canLoanStep2 ? 1 : 0.4 }} disabled={!canLoanStep2} onClick={() => setStep(3)}>
-              Continue →
-            </button>
+            <button style={{ ...T.btnGreen, opacity: canL2 ? 1 : 0.4 }}
+              disabled={!canL2} onClick={() => setStep(3)}>Continue →</button>
           </div>
         )}
 
-        {/* Loan Step 3: Review */}
         {step === 3 && (
-          <div className="slide-up">
-            <div style={styles.cardTitle}>Review & Submit</div>
+          <div className="fu">
+            <div style={{ ...T.cardTitle, marginBottom:4 }}>Review & Submit</div>
+            <p style={{ fontSize:13, color:"#64748b", marginBottom:16 }}>Confirm before submitting</p>
 
-            <div style={styles.reviewBlock}>
-              <div style={styles.reviewHead}>👤 Applicant Details</div>
-              {[
-                ["Full Name", `${loan.firstName} ${loan.lastName}`],
-                ["Phone", loan.phone],
-                ["ID Number", loan.idNumber],
-              ].map(([l, v]) => (
-                <div key={l} style={styles.reviewRow}>
-                  <span style={styles.reviewLbl}>{l}</span>
-                  <span style={styles.reviewVal}>{v}</span>
-                </div>
-              ))}
+            <div style={T.revBlock}>
+              <div style={T.revHead}>👤 Applicant</div>
+              <RevRow label="Full Name" value={`${lFirst} ${lLast}`} />
+              <RevRow label="Phone"     value={lPhone} />
+              <RevRow label="ID No."    value={lIdNum} />
             </div>
 
-            <div style={{ ...styles.reviewBlock, borderColor: "#bfdbfe", background: "#f0f9ff" }}>
-              <div style={{ ...styles.reviewHead, color: "#1e3a5f" }}>💵 Loan Details</div>
-              {[
-                ["Loan Type", loan.loanType],
-                ["Repayment", loan.repayment],
-                ["Purpose", loan.purpose],
-              ].map(([l, v]) => (
-                <div key={l} style={styles.reviewRow}>
-                  <span style={styles.reviewLbl}>{l}</span>
-                  <span style={styles.reviewVal}>{v}</span>
-                </div>
-              ))}
-              <div style={styles.reviewRow}>
-                <span style={styles.reviewLbl}>Amount</span>
-                <span style={{ ...styles.reviewVal, fontSize: 20, color: "#1e3a5f", fontWeight: 900 }}>KES {Number(loan.loanAmount).toLocaleString()}</span>
+            <div style={{ ...T.revBlock, borderColor:"#bfdbfe", background:"#f0f9ff" }}>
+              <div style={{ ...T.revHead, color:"#1d4ed8" }}>💵 Loan Details</div>
+              <RevRow label="Type"      value={lType} />
+              <RevRow label="Repayment" value={lRepay} />
+              <RevRow label="Purpose"   value={lPurpose} />
+              <div style={T.revRow}>
+                <span style={T.revLbl}>Amount</span>
+                <span style={{ ...T.revVal, fontSize:20, color:"#15803d", fontFamily:"'Playfair Display',serif" }}>
+                  KES {Number(lAmount).toLocaleString()}
+                </span>
               </div>
             </div>
 
-            <div style={styles.reviewBlock}>
-              <div style={styles.reviewHead}>📷 Documents</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[["Selfie", loan.selfiePreview], ["ID Front", loan.idFrontPreview], ["ID Back", loan.idBackPreview]].map(([l, src]) => (
-                  <div key={l} style={{ flex: 1, textAlign: "center" }}>
-                    <img src={src} alt={l} style={{ width: "100%", height: 70, objectFit: "cover", borderRadius: 10, border: "1.5px solid #e2e8f0" }} />
-                    <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 4 }}>{l}</div>
+            <div style={T.revBlock}>
+              <div style={T.revHead}>📷 Documents</div>
+              <div style={{ display:"flex", gap:10 }}>
+                {[["Selfie",lSelP],["ID Front",lFrtP],["ID Back",lBckP]].map(([l,src]) => (
+                  <div key={l} style={{ flex:1, textAlign:"center" }}>
+                    <img src={src} alt={l} style={{ width:"100%", height:72, objectFit:"cover",
+                      borderRadius:10, border:"1.5px solid #e2e8f0" }} />
+                    <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>{l}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <button style={styles.btnBlue} onClick={() => setDone(true)}>
-              ✅ Submit Loan Application
-            </button>
+            <div style={{ ...T.totalBox, borderColor:"#93c5fd", background:"#eff6ff" }}>
+              <span style={{ fontWeight:800, color:"#0f172a" }}>Loan Requested</span>
+              <span style={{ fontSize:22, fontWeight:900, color:"#1d4ed8", fontFamily:"'Playfair Display',serif" }}>
+                KES {Number(lAmount).toLocaleString()}
+              </span>
+            </div>
+            <button style={T.btnGreen} onClick={() => setDone(true)}>✅ Submit Loan Application</button>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-// ── STYLES ──
-const styles = {
-  app: { fontFamily: "'Nunito', 'Segoe UI', system-ui, sans-serif", minHeight: "100vh", background: "#f1f5f9", maxWidth: 480, margin: "0 auto" },
-  hero: { background: "linear-gradient(160deg, #1e3a5f 0%, #0f2942 60%, #16a34a 100%)", padding: "36px 24px 40px", textAlign: "center", position: "relative", overflow: "hidden" },
-  heroBadge: { display: "inline-block", background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.8)", fontSize: 9, fontWeight: 800, letterSpacing: "0.15em", padding: "4px 14px", borderRadius: 20, marginBottom: 12, textTransform: "uppercase" },
-  heroLogo: { fontSize: 48, marginBottom: 8 },
-  heroTitle: { fontSize: 32, fontWeight: 900, color: "white", margin: "0 0 10px", lineHeight: 1.1, letterSpacing: "-0.5px" },
-  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.7, margin: 0 },
-  main: { padding: "20px 16px 32px" },
-  feesCard: { background: "white", borderRadius: 18, padding: 18, boxShadow: "0 2px 16px rgba(0,0,0,0.06)", marginBottom: 20 },
-  feeChip: { display: "flex", alignItems: "center", gap: 10, background: "#f8faff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "10px 14px" },
-  noteBox: { background: "#fef3c7", border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#92400e", marginTop: 12 },
-  sectionHead: { fontSize: 13, fontWeight: 800, color: "#1e3a5f", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" },
-  pkgGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 },
-  pkgCard: { borderRadius: 14, border: "1.5px solid", padding: "14px 12px", textAlign: "center" },
-  btnGreen: { width: "100%", background: "linear-gradient(135deg, #16a34a, #15803d)", color: "white", border: "none", borderRadius: 14, padding: "16px", fontSize: 15, fontWeight: 800, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 16px rgba(22,163,74,0.3)" },
-  btnBlue: { width: "100%", background: "linear-gradient(135deg, #1e3a5f, #1d4ed8)", color: "white", border: "none", borderRadius: 14, padding: "16px", fontSize: 15, fontWeight: 800, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 4px 16px rgba(30,58,95,0.3)" },
-  footer: { textAlign: "center", fontSize: 10, color: "#cbd5e1", marginTop: 28, paddingTop: 12, borderTop: "1px solid #e2e8f0" },
-  formHeader: { background: "white", borderBottom: "1px solid #e8edf5", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 8px rgba(0,0,0,0.05)" },
-  backBtn: { background: "#f1f5f9", border: "none", borderRadius: 10, width: 36, height: 36, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#374151", fontFamily: "inherit" },
-  stepBar: { background: "white", borderBottom: "1px solid #e8edf5", padding: "14px 20px", display: "flex", alignItems: "center" },
-  cardTitle: { fontSize: 20, fontWeight: 900, color: "#1e3a5f", marginBottom: 16 },
-  label: { display: "block", fontSize: 11, fontWeight: 800, color: "#374151", marginBottom: 5, letterSpacing: "0.04em", textTransform: "uppercase" },
-  input: { width: "100%", border: "1.5px solid #e2e8f0", borderRadius: 12, padding: "12px 14px", fontSize: 14, fontFamily: "'Nunito', sans-serif", color: "#0f172a", background: "#fafbff", outline: "none", boxSizing: "border-box" },
-  radioPill: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 8px", border: "1.5px solid #e2e8f0", borderRadius: 10, cursor: "pointer", background: "#fafbff", transition: "all 0.2s" },
-  radioPillActive: { borderColor: "#1e3a5f", background: "#eff6ff", color: "#1e3a5f" },
-  pkgSelectCard: { display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", border: "2px solid #e2e8f0", borderRadius: 14, background: "white", transition: "all 0.2s" },
-  photoBox: { width: "100%", height: 120, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.2s" },
-  photoLabel: { fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" },
-  docSection: { background: "#f8faff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14, marginBottom: 14 },
-  docSectionTitle: { fontSize: 12, fontWeight: 800, color: "#1e3a5f", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.06em" },
-  reviewBlock: { background: "white", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 16, marginBottom: 12 },
-  reviewHead: { fontSize: 12, fontWeight: 800, color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12 },
-  reviewRow: { display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" },
-  reviewLbl: { fontSize: 12, color: "#94a3b8", minWidth: 90, flexShrink: 0 },
-  reviewVal: { fontSize: 13, color: "#0f172a", fontWeight: 700, wordBreak: "break-word" },
-};
-
-const cssGlobal = `
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  input:focus, select:focus, textarea:focus { border-color: #1e3a5f !important; box-shadow: 0 0 0 3px rgba(30,58,95,0.1) !important; background: white !important; outline: none; }
-  input::placeholder, textarea::placeholder { color: #cbd5e1; }
-  button:active { opacity: 0.85; transform: scale(0.98); }
-  @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-  .slide-up { animation: slideUp 0.3s ease; }
-`;
